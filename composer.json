@@ -1,0 +1,6 @@
+{
+    "require": {
+        "spomky-labs/otphp": "^11.2",
+        "endroid/qr-code": "^4.8"
+    }
+}
