@@ -1,7 +1,17 @@
 <?php
+    session_start();
     require("../vendor/autoload.php");
 
+    header('Content-Type: application/json');
+
     use OTPHP\TOTP;
+    use Endroid\QrCode\Builder\Builder;
+    use Endroid\QrCode\Encoding\Encoding;
+    use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
+    use Endroid\QrCode\Label\Alignment\LabelAlignmentCenter;
+    use Endroid\QrCode\Label\Font\NotoSans;
+    use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
+    use Endroid\QrCode\Writer\PngWriter;
 
     if($_GET['mode'] == "register") {
         // A random secret will be generated from this.
@@ -14,6 +24,34 @@
         //echo "The current OTP is: {$otp->now()}\n";
 
         $otp->setLabel('PasswordVault');
-        echo $otp->getProvisioningUri();
+        //echo $otp->getProvisioningUri();
+
+        $dataToSend = [];
+        $dataToSend['secret'] = $secret;
+        $_SESSION['otp_secret'] = $secret;
+        $_SESSION['otp_confirmed'] = false;
+
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->writerOptions([])
+            ->data($otp->getProvisioningUri())
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
+            ->size(300)
+            ->margin(10)
+            ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
+            ->validateResult(false)
+            ->build();
+
+        $imageData = base64_encode($result->getString());
+
+        $dataToSend['qr_code'] = $imageData;
+        echo json_encode($dataToSend);
+    }
+    else if($_GET['mode'] == "verify") {
+        $otp = TOTP::createFromSecret($_SESSION['otp_secret']); // create TOTP object from the secret.
+        $val_result = $otp->verify($_POST['code'], null, 10);
+        $_SESSION['otp_confirmed'] = $val_result;
+        echo json_encode(array('valid'=>$val_result));
     }
 ?>
