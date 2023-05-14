@@ -1,6 +1,7 @@
 <?php
 require("header.php");
 ?>
+<script src="scripts/WebAuthnFunctions.js"></script>
 <script>
 $(document).ready(function() {
   if ($('#enable2FA').is(':checked')) {
@@ -21,14 +22,13 @@ $(document).ready(function() {
     // TODO: Implement Google Authenticator pairing
     $(this).prop('disabled', true);
     $(this).after('<span class="ms-2"><i class="fas fa-spinner fa-spin"></i></span>');
-    //$(this).after('<span class="text-success ms-2"><i class="fas fa-check-circle"></i></span>');
   });
 
   $('#yubikeyButton').click(function() {
     // TODO: Implement Yubikey pairing
     $(this).prop('disabled', true);
     $(this).after('<span class="ms-2"><i class="fas fa-spinner fa-spin"></i></span>');
-    //$(this).after('<span class="text-success ms-2"><i class="fas fa-check-circle"></i></span>');
+    createRegistration();
   });
 });
 </script>

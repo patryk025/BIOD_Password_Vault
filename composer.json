@@ -1,6 +1,7 @@
 {
     "require": {
         "spomky-labs/otphp": "^11.2",
-        "endroid/qr-code": "^4.8"
+        "endroid/qr-code": "^4.8",
+        "lbuchs/webauthn": "^1.1"
     }
 }
