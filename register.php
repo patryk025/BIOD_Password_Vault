@@ -74,10 +74,29 @@ $(document).ready(function() {
   });
 
   $('#yubikeyButton').click(function() {
-    // TODO: Implement Yubikey pairing
     $(this).prop('disabled', true);
     $(this).find('.loading-icon').show();
-    createRegistration();
+    createRegistration().then(function(response) {
+      if(response.error) {
+        $('#yubikeyButton').find('.loading-icon').hide();
+        $('#yubikeyButton').prop('disabled', false);
+        switch(response.status) {
+          case "reg_canceled": {
+            bootstrap_alert("Anulowano parowanie z Yubikeyem", "info");
+            break;
+          }
+          case "reg_error": {
+            bootstrap_alert("Wystąpił błąd: "+response.message, "danger");
+          }
+        }
+      }
+      else {
+        if(response.status == "reg_complete") {
+          $('#yubikeyButton').find('.loading-icon').hide();
+          $('#yubikeyButton').find('.success-icon').show();
+        }
+      }
+    })
   });
 
   $('#verifyCodeButton').click(function() {
@@ -91,6 +110,16 @@ $(document).ready(function() {
     }
   });
 });
+
+function bootstrap_alert(message, alertType = "warning") {
+  message = `
+      <div class="alert alert-${alertType} fade show" role="alert">
+          ${message}
+      </div>
+  `;
+  $('#alertModal').find('.modal-body').html(message);
+  $('#alertModal').modal('show');
+}
 </script>
 <div class="container mt-5">
   <div class="row justify-content-center">
@@ -164,6 +193,22 @@ $(document).ready(function() {
       <div class="modal-footer">
         <button type="button" id="verifyCodeButton" class="btn btn-primary">Zatwierdź</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="alertModalLabel">Komunikat</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
