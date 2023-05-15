@@ -2,6 +2,8 @@
     "require": {
         "spomky-labs/otphp": "^11.2",
         "endroid/qr-code": "^4.8",
-        "lbuchs/webauthn": "^1.1"
+        "lbuchs/webauthn": "^1.1",
+        "robmorgan/phinx": "^0.13.4",
+        "vlucas/phpdotenv": "^5.5"
     }
 }
