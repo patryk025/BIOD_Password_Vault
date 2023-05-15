@@ -7,7 +7,7 @@ async function createRegistration() {
         }
 
         // get create args
-        let rep = await window.fetch('api/WebAuthnServer.php?fn=getCreateArgs' + getGetParams(), {method:'GET', cache:'no-cache'});
+        let rep = await window.fetch('api/u2f/WebAuthnServer.php?fn=getCreateArgs' + getGetParams(), {method:'GET', cache:'no-cache'});
         const createArgs = await rep.json();
 
         // error handling
@@ -31,7 +31,7 @@ async function createRegistration() {
             };
 
             // check auth on server side
-            rep = await window.fetch('api/WebAuthnServer.php?fn=processCreate' + getGetParams(), {
+            rep = await window.fetch('api/u2f/WebAuthnServer.php?fn=processCreate' + getGetParams(), {
                 method  : 'POST',
                 body    : JSON.stringify(attestationResponse),
                 cache   : 'no-cache'
@@ -68,7 +68,7 @@ async function checkRegistration() {
         }
 
         // get check args
-        let rep = await window.fetch('api/WebAuthnServer.php?fn=getGetArgs' + getGetParams(), {method:'GET',cache:'no-cache'});
+        let rep = await window.fetch('api/u2f/WebAuthnServer.php?fn=getGetArgs' + getGetParams(), {method:'GET',cache:'no-cache'});
         const getArgs = await rep.json();
 
         // error handling
@@ -94,7 +94,7 @@ async function checkRegistration() {
             };
 
             // send to server
-            rep = await window.fetch('api/WebAuthnServer.php?fn=processGet' + getGetParams(), {
+            rep = await window.fetch('api/u2f/WebAuthnServer.php?fn=processGet' + getGetParams(), {
                 method:'POST',
                 body: JSON.stringify(attestationResponse),
                 cache:'no-cache'
@@ -120,7 +120,7 @@ async function checkRegistration() {
 }
 
 function clearRegistration() {
-    window.fetch('api/WebAuthnServer.php?fn=clearRegistrations' + getGetParams(), {method:'GET',cache:'no-cache'}).then(function(response) {
+    window.fetch('api/u2f/WebAuthnServer.php?fn=clearRegistrations' + getGetParams(), {method:'GET',cache:'no-cache'}).then(function(response) {
         return response.json();
 
     }).then(function(json) {

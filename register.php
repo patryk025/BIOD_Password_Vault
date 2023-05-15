@@ -28,7 +28,7 @@ function verifyCode() {
     $('#authenticatorCode').next('.invalid-feedback').text('Niepoprawna długość kodu, musi mieć 6 znaków.');
     return false;
   }
-  $.post("api/OtpInterface.php?mode=verify", {code: code}, function(result){
+  $.post("api/u2f/OtpInterface.php?mode=verify", {code: code}, function(result){
     if(result.valid) {
       $('#authenticatorCode').addClass('is-valid');
       $("#authenticatorModal").modal('hide');
@@ -55,7 +55,7 @@ $(document).ready(function() {
     // TODO: Implement Google Authenticator pairing
     $(this).prop('disabled', true);
     $(this).find('.loading-icon').show();
-    $.get( "api/OtpInterface.php?mode=register", function( data ) {
+    $.get( "api/u2f/OtpInterface.php?mode=register", function( data ) {
       $("#authenticatorSecret").val(data.secret);
       $('#qrCodeContainer').html("");
       var img = $('<img>');
