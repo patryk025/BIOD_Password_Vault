@@ -8,7 +8,7 @@ final class OtpSecrets extends AbstractMigration
     public function change(): void
     {
         $users = $this->table('otp_secrets');
-        $users->addColumn('id_user', 'integer', ['null' => false])
+        $users->addColumn('id_user', 'integer', ['null' => false, 'signed' => false])
               ->addColumn('encrypted_secret', 'string')
               ->addColumn('created', 'datetime')
               ->addIndex(['id_user'], ['unique' => true])
