@@ -1,13 +1,19 @@
 <?php
 
 class DbAdapter {
-    protected $dbConnection;
+    private static $dbConnection;
 
-    public function __construct() {
-        $this->dbConnection = new mysqli($_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV['DB_PASS'], $_ENV['DB_PORT'], $_ENV['DB_ENC']);
+    public static function getDbConnection() {
+        if (self::$dbConnection === null) {
+            self::$dbConnection = new mysqli($_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV['DB_PASS'], $_ENV['DB_PORT'], $_ENV['DB_ENC']);
+        }
+
+        return self::$dbConnection;
     }
 
-    public function insertObject($table, $object) {
+    public static function insertObject($table, $object) {
+        $db = self::getDbConnection();
+
         $objectVars = get_object_vars($object);
         $columns = array_keys($objectVars);
         $values = array_values($objectVars);
@@ -16,36 +22,65 @@ class DbAdapter {
         $paramList = implode(',', array_fill(0, count($values), '?'));
 
         $query = "INSERT INTO {$table} ({$columnList}) VALUES ({$paramList})";
-        $statement = $this->dbConnection->prepare($query);
+        $statement = $db->prepare($query);
         $statement->execute($values);
     }
 
-    public function queryObject($table, $id) {
-        // Przygotuj zapytanie
-        $query = "SELECT * FROM {$table} WHERE id = ?";
-        $statement = $this->dbConnection->prepare($query);
-        
-        // Bindowanie wartości do zapytania
-        $statement->bind_param('i', $id);
-    
-        // Wykonaj zapytanie
+    public static function editAttributeInObject($table, $attr, $val, $id, $where_key) {
+        $db = self::getDbConnection();
+
+        $query = "UPDATE {$table} SET {$attr} = ? WHERE {$where_key} = ?";
+        $statement = $db->prepare($query);
+        $statement->bind_param('si', $val, $id);
         $statement->execute();
-    
-        // Pobierz wyniki
+    }
+
+    public static function queryObject($table, $id) {
+        $db = self::getDbConnection();
+
+        $query = "SELECT * FROM {$table} WHERE id = ?";
+        $statement = $db->prepare($query);
+
+        $statement->bind_param('i', $id);
+
+        $statement->execute();
+
         $result = $statement->get_result()->fetch_assoc();
-    
-        // Przekształć wyniki w obiekt
-        // Zakładam, że istnieje klasa o nazwie identycznej z nazwą tabeli
-        $className = snakeToCamel($table);
+
+        $className = ucfirst($table);
         if (!class_exists($className)) {
             throw new Exception("Klasa {$className} nie istnieje.");
         }
-    
+
         $object = new $className($result);
         return $object;
     }
 
-    private function snakeToCamel($input) {
+    public static function queryObjects($table, $id, $foreign_key) {
+        $db = self::getDbConnection();
+
+        $query = "SELECT * FROM {$table} WHERE {$foreign_key} = ?";
+        $statement = $db->prepare($query);
+        $statement->bind_param('i', $id);
+        $statement->execute();
+        
+        // Pobierz wyniki
+        $results = $statement->get_result();
+
+        $className = ucfirst($table);
+        if (!class_exists($className)) {
+            throw new Exception("Klasa {$className} nie istnieje.");
+        }
+        
+        $dataObjects = [];
+        while ($row = $results->fetch_assoc()) {
+            $dataObjects[] = new $className($row);
+        }
+        
+        return $dataObjects;
+    }
+
+    private static function snakeToCamel($input) {
         return ucfirst(str_replace('_', '', ucwords($input, '_')));
     }
 }
