@@ -17,4 +17,6 @@
         $yubi_cert_subject = $yubi_data['certificateSubject'];
     }
 
+    
+
 ?>
