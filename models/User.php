@@ -1,5 +1,7 @@
 <?php
 
+namespace models;
+
 class User extends Model {
     private $id;
     private $email;
@@ -36,6 +38,17 @@ class User extends Model {
 
     public function getPasswords() {
         return DbAdapter::queryObjects('vaults', $id, 'id_user');
+    }
+
+    public static function createUser($email, $password) {
+        $instance = new self();
+        $instance->email = $email;
+        $instance->password = password_hash($password, PASSWORD_DEFAULT);
+        $instance->password_salt = bin2hex(random_bytes(16));
+        $instance->is_verified = 0;
+        $instance->created = date('Y-m-d H:i:s');
+        $instance->updated = date('Y-m-d H:i:s');
+        return $instance;
     }
 }
 

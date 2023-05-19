@@ -1,14 +1,16 @@
 <?php
 
+namespace models;
+
 class OtpSecret extends Model {
     private $id;
-    private $user_id;
+    private $id_user;
     private $encrypted_secret;
     private $created;
 
     public function __construct($fields) {
         $this->id = $fields['id'];
-        $this->user_id = $fields['user_id'];
+        $this->id_user = $fields['id_user'];
         $this->encrypted_secret = $fields['encrypted_secret'];
         $this->created = $fields['created'];
     }
@@ -26,13 +28,13 @@ class OtpSecret extends Model {
 
     public function getUserId()
     {
-        return $this->user_id;
+        return $this->id_user;
     }
 
-    public function setUserId($user_id): self
+    public function setUserId($id_user): self
     {
-        $this->user_id = $user_id;
-        DbAdapter::editAttributeInObject('otp_secret', 'user_id', $user_id, $this->id, 'id');
+        $this->id_user = $id_user;
+        DbAdapter::editAttributeInObject('otp_secret', 'id_user', $id_user, $this->id, 'id');
         return $this;
     }
 
@@ -59,4 +61,13 @@ class OtpSecret extends Model {
         DbAdapter::editAttributeInObject('otp_secret', 'created', $created, $this->id, 'id');
         return $this;
     }
+
+    public static function createSecret($user, $encrypted_secret) {
+        $instance = new self();
+        $instance->id_user = $user->getId();
+        $instance->encrypted_secret = $encrypted_secret;
+        $instance->created = date('Y-m-d H:i:s');
+        return $instance;
+    }
 }
+?>

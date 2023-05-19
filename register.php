@@ -109,6 +109,25 @@ $(document).ready(function() {
       verifyCode()
     }
   });
+
+  $("#register_form").submit(function(event) {
+    event.preventDefault(); // zapobiega domyślnej akcji formularza
+
+    var formData = $(this).serialize(); // zbiera dane z formularza
+
+    $.ajax({
+        type: "POST",
+        url: "api/saveNewUser.php",
+        data: formData,
+        dataType: "json",
+        success: function(data) {
+          bootstrap_alert("Na podanego maila wysłano kod jednorazowy. Proszę postępować zgodnie z instrukcjami", "success");
+        },
+        error: function(data) {
+          bootstrap_alert("Wystąpił błąd, spróbuj ponownie później", "danger");
+        }
+    });
+});
 });
 
 function bootstrap_alert(message, alertType = "warning") {
@@ -127,7 +146,7 @@ function bootstrap_alert(message, alertType = "warning") {
       <div class="card">
         <div class="card-body">
           <h5 class="card-title text-center">Rejestracja</h5>
-          <form action="register.php" method="post">
+          <form id="register_form" action="#" method="post">
             <div class="mb-3">
               <label for="registerEmail" class="form-label">Email</label>
               <input type="email" class="form-control" id="registerEmail" name="email" required>

@@ -1,5 +1,7 @@
 <?php
 
+namespace db;
+
 class DbAdapter {
     private static $dbConnection;
 
@@ -68,7 +70,6 @@ class DbAdapter {
         $statement->bind_param('i', $id);
         $statement->execute();
         
-        // Pobierz wyniki
         $results = $statement->get_result();
 
         $className = ucfirst($table);
