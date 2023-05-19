@@ -45,11 +45,17 @@ class DbAdapter {
 
         $query = "INSERT INTO {$table} ({$columnList}) VALUES ({$paramList})";
         $statement = $db->prepare($query);
-        $statement->execute($values);
+        try {
+            $statement->execute($values);
 
-        $last_id = $db->insert_id;
+            $last_id = $db->insert_id;
 
-        $object->setId($last_id);
+            $object->setId($last_id);
+            return true;
+        }
+        catch(Exception $e) {
+            return false;
+        }
     }
 
     public static function editAttributeInObject($table, $attr, $val, $id, $where_key) {
@@ -58,7 +64,13 @@ class DbAdapter {
         $query = "UPDATE {$table} SET {$attr} = ? WHERE {$where_key} = ?";
         $statement = $db->prepare($query);
         $statement->bind_param('si', $val, $id);
-        $statement->execute();
+        try {
+            $statement->execute();
+            return true;
+        }
+        catch(Exception $e) {
+            return false;
+        }
     }
 
     public static function queryObject($table, $id) {
@@ -69,17 +81,21 @@ class DbAdapter {
 
         $statement->bind_param('i', $id);
 
-        $statement->execute();
+        try {
+            $statement->execute();
+            $result = $statement->get_result()->fetch_assoc();
 
-        $result = $statement->get_result()->fetch_assoc();
+            $className = ucfirst($table);
+            if (!class_exists($className)) {
+                throw new Exception("Klasa {$className} nie istnieje.");
+            }
 
-        $className = ucfirst($table);
-        if (!class_exists($className)) {
-            throw new Exception("Klasa {$className} nie istnieje.");
+            $object = new $className($result);
+            return $object;
         }
-
-        $object = new $className($result);
-        return $object;
+        catch(Exception $e) {
+            return null;
+        }
     }
 
     public static function queryObjects($table, $id, $foreign_key) {
@@ -88,21 +104,26 @@ class DbAdapter {
         $query = "SELECT * FROM {$table} WHERE {$foreign_key} = ?";
         $statement = $db->prepare($query);
         $statement->bind_param('i', $id);
-        $statement->execute();
-        
-        $results = $statement->get_result();
 
-        $className = ucfirst($table);
-        if (!class_exists($className)) {
-            throw new Exception("Klasa {$className} nie istnieje.");
+        try {
+            $statement->execute();
+            $result = $statement->get_result();
+
+            $className = ucfirst($table);
+            if (!class_exists($className)) {
+                throw new Exception("Klasa {$className} nie istnieje.");
+            }
+
+            $dataObjects = [];
+            while ($row = $results->fetch_assoc()) {
+                $dataObjects[] = new $className($row);
+            }
+            
+            return $dataObjects;
         }
-        
-        $dataObjects = [];
-        while ($row = $results->fetch_assoc()) {
-            $dataObjects[] = new $className($row);
+        catch(Exception $e) {
+            return []];
         }
-        
-        return $dataObjects;
     }
 
     public static function removeObject($table, $object) {
@@ -113,7 +134,13 @@ class DbAdapter {
         $query = "DELETE FROM {$table} WHERE id = ?";
         $statement = $db->prepare($query);
         $statement->bind_param('i', $id);
-        $statement->execute();
+        try {
+            $statement->execute();
+            return true;
+        }
+        catch(Exception $e) {
+            return false;
+        }
     }
 
     private static function snakeToCamel($input) {
