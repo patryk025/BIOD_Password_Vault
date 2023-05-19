@@ -1,6 +1,9 @@
 <?php
 
-namespace db;
+foreach (glob("../models/*.php") as $filename)
+{
+    require_once $filename;
+}
 
 class DbAdapter {
     private static $dbConnection;

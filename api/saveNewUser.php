@@ -1,12 +1,13 @@
 <?php
-    use db\User;
-    use db\OtpSecret;
-    use db\YubikeyData;
+    foreach (glob("../models/*.php") as $filename)
+    {
+        require_once $filename;
+    }
 
     session_start();
 
     $email = $_POST['email'];
-    $password = $_POST['pass'];
+    $password = $_POST['password'];
 
     $user = User::createUser($email, $password);
     $user->create();

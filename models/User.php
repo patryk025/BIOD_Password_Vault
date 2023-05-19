@@ -1,6 +1,7 @@
 <?php
 
-namespace models;
+require_once "Model.php";
+require_once "../db/DbAdapter.php";
 
 class User extends Model {
     private $id;
@@ -13,14 +14,16 @@ class User extends Model {
     private $yubikeyData;
     private $OTPData;
 
-    public function __construct($fields) {
-        $this->id = $fields['id'];
-        $this->email = $fields['email'];
-        $this->password = $fields['password'];
-        $this->password_salt = $fields['password_salt'];
-        $this->is_verified = $fields['is_verified'];
-        $this->created = $fields['created'];
-        $this->updated = $fields['updated'];
+    public function __construct($fields = null) {
+        if($fields != null) {
+            $this->id = $fields['id'];
+            $this->email = $fields['email'];
+            $this->password = $fields['password'];
+            $this->password_salt = $fields['password_salt'];
+            $this->is_verified = $fields['is_verified'];
+            $this->created = $fields['created'];
+            $this->updated = $fields['updated'];
+        }
     }
 
     public function verifyUser($code) {

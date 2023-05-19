@@ -1,6 +1,6 @@
 <?php
 
-namespace models;
+require_once "Model.php";
 
 class EmailCodes extends Model {
     private $id;
