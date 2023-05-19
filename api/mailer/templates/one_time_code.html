@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Weryfikacja adresu email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .wrapper {
+            max-width: 600px;
+            margin: auto;
+        }
+        .header {
+            background-color: #f8f8f8;
+            padding: 20px;
+            text-align: center;
+            font-size: 30px;
+            color: #333;
+        }
+        .content {
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .footer {
+            background-color: #f8f8f8;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header">
+            <h1>Weryfikacja adresu email</h1>
+        </div>
+        <div class="content">
+            <p>Witaj,</p>
+            <p>Otrzymaliśmy prośbę o dodanie tego adresu e-mail do Twojego konta na naszej stronie.</p>
+            <p>Proszę użyć poniższego kodu jednorazowego, aby potwierdzić ten adres e-mail. Ten kod wygaśnie po 15 minutach.</p>
+            <h2 style="text-align: center;">{one_time_code}</h2>
+            <p><a href="{domain_name}/verify_email.php?unique_id={unique_id}">Kliknij tu</a> i podaj tam kod jednorazowy, żeby zweryfikować adres e-mail.</p>
+            <p>Jeśli to nie Ty prosiłeś o dodanie tego adresu e-mail, zignoruj tę wiadomość.</p>
+            <p>Z poważaniem,</p>
+            <p>Twój Zespół</p>
+        </div>
+        <div class="footer">
+            © 2023 Twoja Firma. Wszelkie prawa zastrzeżone.
+        </div>
+    </div>
+</body>
+</html>

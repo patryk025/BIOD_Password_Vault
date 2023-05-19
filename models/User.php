@@ -1,6 +1,6 @@
 <?php
 
-class User {
+class User extends Model {
     private $id;
     private $email;
     private $password;
@@ -21,16 +21,21 @@ class User {
         $this->updated = $fields['updated'];
     }
 
-    public function verifyUser() {
+    public function verifyUser($code) {
         $this->is_verified = true;
+        DbAdapter::editAttributeInObject('users', 'is_verified', "1", $this->id, 'id');
     }
     
     public function getYubikeyData() {
-        return DbAdapter::queryObjects('yubikey_data', $id, 'user_id');
+        return DbAdapter::queryObjects('yubikey_data', $id, 'id_user');
     }
 
     public function getOTPData() {
-        return DbAdapter::queryObjects('otp_secrets', $id, 'user_id');
+        return DbAdapter::queryObjects('otp_secrets', $id, 'id_user');
+    }
+
+    public function getPasswords() {
+        return DbAdapter::queryObjects('vaults', $id, 'id_user');
     }
 }
 

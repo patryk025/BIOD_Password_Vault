@@ -24,6 +24,10 @@ class DbAdapter {
         $query = "INSERT INTO {$table} ({$columnList}) VALUES ({$paramList})";
         $statement = $db->prepare($query);
         $statement->execute($values);
+
+        $last_id = $db->insert_id;
+
+        $object->id = $last_id;
     }
 
     public static function editAttributeInObject($table, $attr, $val, $id, $where_key) {
@@ -78,6 +82,17 @@ class DbAdapter {
         }
         
         return $dataObjects;
+    }
+
+    public static function removeObject($table, $object) {
+        $db = self::getDbConnection();
+
+        $id = $object->getId();
+
+        $query = "DELETE FROM {$table} WHERE id = ?";
+        $statement = $db->prepare($query);
+        $statement->bind_param('i', $id);
+        $statement->execute();
     }
 
     private static function snakeToCamel($input) {

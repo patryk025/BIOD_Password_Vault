@@ -11,7 +11,6 @@ final class OtpSecrets extends AbstractMigration
         $users->addColumn('id_user', 'integer', ['null' => false, 'signed' => false])
               ->addColumn('encrypted_secret', 'string')
               ->addColumn('created', 'datetime')
-              ->addIndex(['id_user'], ['unique' => true])
               ->addForeignKey('id_user', 'users', 'id', ['delete'=> 'CASCADE', 'update'=> 'CASCADE'])
               ->create();
     }

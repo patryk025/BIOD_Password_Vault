@@ -6,6 +6,7 @@
 
     if(isset($_SESSION['otp_verified']) && $_SESSION['otp_verified']) {
         $otp_secret = $_SESSION['otp_secret'];
+        
     }
 
     if(isset($_SESSION['registrations'])) {

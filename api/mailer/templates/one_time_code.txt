@@ -1,0 +1,15 @@
+Witaj,
+
+Otrzymaliśmy prośbę o dodanie tego adresu e-mail do Twojego konta na naszej stronie.
+Proszę użyć poniższego kodu jednorazowego, aby potwierdzić ten adres e-mail. Ten kod wygaśnie po 15 minutach.
+
+{one_time_code}
+
+Wejdź w podaną stronę i podaj tam kod jednorazowy, żeby zweryfikować adres e-mail: {domain_name}/verify_email.php?unique_id={unique_id}
+
+Jeśli to nie Ty prosiłeś o dodanie tego adresu e-mail, zignoruj tę wiadomość.
+
+Z poważaniem,
+Twój Zespół
+
+© 2023 Twoja Firma. Wszelkie prawa zastrzeżone.

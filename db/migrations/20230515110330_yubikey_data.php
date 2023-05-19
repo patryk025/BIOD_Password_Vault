@@ -14,7 +14,6 @@ final class YubikeyData extends AbstractMigration
               ->addColumn('certificate_issuer', 'string')
               ->addColumn('certificate_subject', 'string')
               ->addColumn('created', 'datetime')
-              ->addIndex(['id_user'], ['unique' => true])
               ->addForeignKey('id_user', 'users', 'id', ['delete'=> 'CASCADE', 'update'=> 'CASCADE'])
               ->create();
     }
