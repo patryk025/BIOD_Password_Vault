@@ -53,6 +53,90 @@ class User extends Model {
         $instance->updated = date('Y-m-d H:i:s');
         return $instance;
     }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function setId($id): self
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    public function setEmail($email): self
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    public function setPassword($password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    public function getPasswordSalt()
+    {
+        return $this->password_salt;
+    }
+
+    public function setPasswordSalt($password_salt): self
+    {
+        $this->password_salt = $password_salt;
+
+        return $this;
+    }
+
+    public function getIsVerified()
+    {
+        return $this->is_verified;
+    }
+
+    public function setIsVerified($is_verified): self
+    {
+        $this->is_verified = $is_verified;
+
+        return $this;
+    }
+
+    public function getCreated()
+    {
+        return $this->created;
+    }
+
+    public function setCreated($created): self
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    public function getUpdated()
+    {
+        return $this->updated;
+    }
+
+    public function setUpdated($updated): self
+    {
+        $this->updated = $updated;
+
+        return $this;
+    }
 }
 
 ?>

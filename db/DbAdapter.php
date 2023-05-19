@@ -5,12 +5,17 @@ foreach (glob("../models/*.php") as $filename)
     require_once $filename;
 }
 
+require("../vendor/autoload.php");
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../");
+$dotenv->load();
+
 class DbAdapter {
     private static $dbConnection;
 
     public static function getDbConnection() {
         if (self::$dbConnection === null) {
-            self::$dbConnection = new mysqli($_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV['DB_PASS'], $_ENV['DB_PORT'], $_ENV['DB_ENC']);
+            self::$dbConnection = new mysqli($_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV['DB_PASS'], $_ENV['DB_NAME'], intval($_ENV['DB_PORT']), $_ENV['DB_ENC']);
         }
 
         return self::$dbConnection;
@@ -19,9 +24,21 @@ class DbAdapter {
     public static function insertObject($table, $object) {
         $db = self::getDbConnection();
 
-        $objectVars = get_object_vars($object);
-        $columns = array_keys($objectVars);
-        $values = array_values($objectVars);
+        $reflector = new ReflectionClass(get_class($object));
+        $properties = $reflector->getProperties(ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED);
+
+        $columns = [];
+        $values = [];
+
+        foreach ($properties as $property) {
+            $property->setAccessible(true);
+            $propertyName = $property->getName();
+            if($propertyName != "yubikeyData" && $propertyName != "OTPData") {
+                $columns[] = $propertyName;
+                $values[] = $property->getValue($object);
+            }
+            $property->setAccessible(false);
+        }
 
         $columnList = implode(',', $columns);
         $paramList = implode(',', array_fill(0, count($values), '?'));
@@ -32,7 +49,7 @@ class DbAdapter {
 
         $last_id = $db->insert_id;
 
-        $object->id = $last_id;
+        $object->setId($last_id);
     }
 
     public static function editAttributeInObject($table, $attr, $val, $id, $where_key) {
