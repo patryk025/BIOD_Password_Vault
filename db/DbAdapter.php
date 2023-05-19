@@ -122,7 +122,7 @@ class DbAdapter {
             return $dataObjects;
         }
         catch(Exception $e) {
-            return []];
+            return [];
         }
     }
 
