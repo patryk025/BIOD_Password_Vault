@@ -5,7 +5,7 @@ foreach (glob("../models/*.php") as $filename)
     require_once $filename;
 }
 
-require("../vendor/autoload.php");
+require(__DIR__."/../vendor/autoload.php");
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../");
 $dotenv->load();
@@ -103,7 +103,7 @@ class DbAdapter {
 
         $query = "SELECT * FROM {$table} WHERE {$foreign_key} = ?";
         $statement = $db->prepare($query);
-        $statement->bind_param('i', $id);
+        $statement->bind_param('s', $id);
 
         try {
             $statement->execute();

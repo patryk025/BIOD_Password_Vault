@@ -15,7 +15,6 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ ."/../../");
 $dotenv->load();
 
 function sendMail($email, $subject, $body, $alt_body) {
-    return true;
     $mail = new PHPMailer(true);
 
     try {
