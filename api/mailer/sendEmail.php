@@ -7,12 +7,15 @@ use PHPMailer\PHPMailer\Exception;
 use OTPHP\TOTP;
 
 //Load Composer's autoloader
-require '../../vendor/autoload.php';
+require '../vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+require_once "../models/EmailCodes.php";
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ ."/../../");
 $dotenv->load();
 
 function sendMail($email, $subject, $body, $alt_body) {
+    return true;
     $mail = new PHPMailer(true);
 
     try {
@@ -42,25 +45,25 @@ function sendMail($email, $subject, $body, $alt_body) {
     }
 }
 
-function sendOneTimeCode($email) {
+function sendOneTimeCode($user) {
     $totp = TOTP::create();
     $otp = $totp->now();
     $uniqueId = uniqid();
     $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
 
     $subject = 'Kod jednorazowy';
-    $message = file_get_contents("templates/one_time_code.html");
+    $message = file_get_contents("mailer/templates/one_time_code.html");
     $message = str_replace('{one_time_code}', $otp, $message);
     $message = str_replace('{domain_name}', $baseUrl, $message);
     $message = str_replace('{unique_id}', $uniqueId, $message);
 
-    $alt_message = file_get_contents("templates/one_time_code.txt");
+    $alt_message = file_get_contents("mailer/templates/one_time_code.txt");
     $alt_message = str_replace('{one_time_code}', $otp, $alt_message);
     $alt_message = str_replace('{domain_name}', $baseUrl, $alt_message);
     $alt_message = str_replace('{unique_id}', $uniqueId, $alt_message);
 
-    if(sendMail($email, $subject, $message, $alt_message)) {
-
+    if(sendMail($user->getEmail(), $subject, $message, $alt_message)) {
+        DbAdapter::insertObject('email_codes', new EmailCodes($user->getId(), $uniqueId, $otp));        
     }
     else {
         return false;

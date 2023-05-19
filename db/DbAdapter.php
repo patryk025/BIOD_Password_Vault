@@ -54,7 +54,7 @@ class DbAdapter {
             return true;
         }
         catch(Exception $e) {
-            return false;
+            return $e->getCode();
         }
     }
 
@@ -69,7 +69,7 @@ class DbAdapter {
             return true;
         }
         catch(Exception $e) {
-            return false;
+            return $e->getCode();
         }
     }
 
@@ -139,7 +139,7 @@ class DbAdapter {
             return true;
         }
         catch(Exception $e) {
-            return false;
+            return $e->getCode();
         }
     }
 

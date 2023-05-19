@@ -46,8 +46,8 @@ class User extends Model {
     public static function createUser($email, $password) {
         $instance = new self();
         $instance->email = $email;
-        $instance->password = password_hash($password, PASSWORD_DEFAULT);
         $instance->password_salt = bin2hex(random_bytes(16));
+        $instance->password = password_hash($password.":".$instance->password_salt, PASSWORD_DEFAULT);
         $instance->is_verified = 0;
         $instance->created = date('Y-m-d H:i:s');
         $instance->updated = date('Y-m-d H:i:s');

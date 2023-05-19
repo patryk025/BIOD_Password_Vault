@@ -121,7 +121,10 @@ $(document).ready(function() {
         data: formData,
         dataType: "json",
         success: function(data) {
-          bootstrap_alert("Na podanego maila wysłano kod jednorazowy. Proszę postępować zgodnie z instrukcjami", "success");
+          if(data.error)
+            bootstrap_alert(data.msg, "danger");
+          else
+            bootstrap_alert("Na podanego maila wysłano kod jednorazowy. Proszę postępować zgodnie z instrukcjami", "success");
         },
         error: function(data) {
           bootstrap_alert("Wystąpił błąd, spróbuj ponownie później", "danger");

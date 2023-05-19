@@ -2,7 +2,7 @@
 
 require_once "Model.php";
 
-class YubikeyData {
+class YubikeyData extends Model {
     private $id;
     private $id_user;
     private $credential_public_key;
@@ -11,14 +11,16 @@ class YubikeyData {
     private $certificate_subject;
     private $created;
 
-    public function __construct($fields) {
-        $this->id = $fields['id'];
-        $this->id_user = $fields['id_user'];
-        $this->credential_public_key = $fields['credential_public_key'];
-        $this->certificate = $fields['certificate'];
-        $this->certificate_issuer = $fields['certificate_issuer'];
-        $this->certificate_subject = $fields['certificate_subject'];
-        $this->created = $fields['created'];
+    public function __construct($fields = null) {
+        if($fields != null) {
+            $this->id = $fields['id'];
+            $this->id_user = $fields['id_user'];
+            $this->credential_public_key = $fields['credential_public_key'];
+            $this->certificate = $fields['certificate'];
+            $this->certificate_issuer = $fields['certificate_issuer'];
+            $this->certificate_subject = $fields['certificate_subject'];
+            $this->created = $fields['created'];
+        }
     }
 
     public function getId()

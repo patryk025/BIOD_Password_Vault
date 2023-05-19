@@ -15,10 +15,10 @@ class Model {
     }
 
     public function create() {
-        DbAdapter::insertObject(self::camelToSnake(get_class($this)), $this);
+        return DbAdapter::insertObject(self::camelToSnake(get_class($this)), $this);
     }
 
     public function remove() {
-        DbAdapter::removeObject(self::camelToSnake(get_class($this)), $this);
+        return DbAdapter::removeObject(self::camelToSnake(get_class($this)), $this);
     }
 }

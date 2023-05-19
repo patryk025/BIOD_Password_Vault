@@ -8,11 +8,13 @@ class OtpSecret extends Model {
     private $encrypted_secret;
     private $created;
 
-    public function __construct($fields) {
-        $this->id = $fields['id'];
-        $this->id_user = $fields['id_user'];
-        $this->encrypted_secret = $fields['encrypted_secret'];
-        $this->created = $fields['created'];
+    public function __construct($fields = null) {
+        if($fields != null) {
+            $this->id = $fields['id'];
+            $this->id_user = $fields['id_user'];
+            $this->encrypted_secret = $fields['encrypted_secret'];
+            $this->created = $fields['created'];
+        }
     }
 
     public function getId()
