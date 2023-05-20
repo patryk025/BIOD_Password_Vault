@@ -26,6 +26,7 @@ function sendMail($email, $subject, $body, $alt_body) {
         $mail->Password   = $_ENV['MAILER_PASS'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = $_ENV['MAILER_PORT'];
+        $mail->CharSet    = "UTF-8";
 
         $mail->setFrom($_ENV['MAILER_ADDRESS'], 'Password Vault');
         $mail->addAddress($email);
