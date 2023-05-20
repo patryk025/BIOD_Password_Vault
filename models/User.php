@@ -1,7 +1,7 @@
 <?php
 
-require_once "Model.php";
-require_once "../db/DbAdapter.php";
+require_once __DIR__."/Model.php";
+require_once __DIR__."/../db/DbAdapter.php";
 
 class User extends Model {
     private $id;
@@ -29,6 +29,8 @@ class User extends Model {
     public function verifyUser($code) {
         $this->is_verified = true;
         DbAdapter::editAttributeInObject('users', 'is_verified', "1", $this->id, 'id');
+        $this->updated = date('Y-m-d H:i:s');
+        DbAdapter::editAttributeInObject('users', 'updated', $this->updated, $this->id, 'id');
     }
     
     public function getYubikeyData() {

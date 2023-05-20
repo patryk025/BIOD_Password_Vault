@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
 
-final class Vaults extends AbstractMigration
+final class Passwords extends AbstractMigration
 {
     public function change(): void
     {
-        $users = $this->table('vaults');
+        $users = $this->table('passwords');
         $users->addColumn('id_user', 'integer', ['null' => false, 'signed' => false])
               ->addColumn('url', 'string', ['null' => false])
               ->addColumn('login', 'string', ['null' => false])

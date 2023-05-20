@@ -1,7 +1,7 @@
 <?php
 
-foreach (glob("../models/*.php") as $filename)
-{
+foreach (glob(__DIR__."/../models/*.php") as $filename)
+{;
     require_once $filename;
 }
 
@@ -85,7 +85,7 @@ class DbAdapter {
             $statement->execute();
             $result = $statement->get_result()->fetch_assoc();
 
-            $className = ucfirst($table);
+            $className = self::snakeToCamel($table);
             if (!class_exists($className)) {
                 throw new Exception("Klasa {$className} nie istnieje.");
             }
@@ -109,19 +109,20 @@ class DbAdapter {
             $statement->execute();
             $result = $statement->get_result();
 
-            $className = ucfirst($table);
+            $className = self::snakeToCamel($table);
             if (!class_exists($className)) {
                 throw new Exception("Klasa {$className} nie istnieje.");
             }
 
             $dataObjects = [];
-            while ($row = $results->fetch_assoc()) {
+            while ($row = $result->fetch_assoc()) {
                 $dataObjects[] = new $className($row);
             }
             
             return $dataObjects;
         }
         catch(Exception $e) {
+            var_dump($e);
             return [];
         }
     }
@@ -144,6 +145,12 @@ class DbAdapter {
     }
 
     private static function snakeToCamel($input) {
+        /*$parts = explode("_", $input);
+        $result = "";
+        foreach($parts as $part) {
+            $result .= ucfirst($part);
+        }
+        return $result;*/
         return ucfirst(str_replace('_', '', ucwords($input, '_')));
     }
 }

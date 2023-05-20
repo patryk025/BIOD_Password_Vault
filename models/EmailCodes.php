@@ -1,6 +1,6 @@
 <?php
 
-require_once "Model.php";
+require_once __DIR__."/Model.php";
 
 class EmailCodes extends Model {
     private $id;
@@ -10,18 +10,32 @@ class EmailCodes extends Model {
     private $valid_from;
     private $valid_to;
     
-    public function __construct($id_user, $identifier, $valid_code) {
-        $this->id_user = $id_user;
-        $this->identifier = $identifier;
-        $this->valid_code = $valid_code;
+    public function __construct($fields = null) {
+        if($fields != null) {
+            $this->id_user = $fields['id_user'];
+            $this->identifier = $fields['identifier'];
+            $this->valid_code = $fields['valid_code'];
+            $this->valid_from = $fields['valid_from'];
+            $this->valid_to = $fields['valid_to'];
+        }
+    }
+
+    public static function createEmail($user, $identifier, $valid_code) {
+        $instance = new self();
+
+        $instance->id_user = $user->getId();
+        $instance->identifier = $identifier;
+        $instance->valid_code = $valid_code;
         
-        $this->valid_from = new DateTime(); 
+        $instance->valid_from = new DateTime(); 
 
         $valid_to = clone $this->valid_from; 
         $valid_to->add(new DateInterval('PT15M'));
 
-        $this->valid_from = $this->valid_from->format('Y-m-d H:i:s');
-        $this->valid_to = $valid_to->format('Y-m-d H:i:s');
+        $instance->valid_from = $this->valid_from->format('Y-m-d H:i:s');
+        $instance->valid_to = $valid_to->format('Y-m-d H:i:s');
+
+        return $instance;
     }
 
     public function getId()
@@ -93,6 +107,12 @@ class EmailCodes extends Model {
     {
         $this->valid_to = $valid_to;
 
+        DbAdapter::editAttributeInObject('email_codes', 'valid_to', $valid_to, $this->id, 'id');
+
         return $this;
+    }
+
+    public function deactivate() {
+        $this->setValidTo(date('Y-m-d H:i:s')); 
     }
 }

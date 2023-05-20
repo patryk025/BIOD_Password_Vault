@@ -1,6 +1,6 @@
 <?php
 
-require_once "Model.php";
+require_once __DIR__."/Model.php";
 
 class YubikeyData extends Model {
     private $id;

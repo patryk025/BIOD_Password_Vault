@@ -20,6 +20,9 @@ require("header.php");
               <button type="submit" class="btn btn-primary">Zaloguj się</button>
             </div>
           </form>
+          <div class="mb-3">
+            <span>Nie masz konta? Zarejestruj się <a href="register.php">tutaj</a></span>
+          </div>
         </div>
       </div>
     </div>

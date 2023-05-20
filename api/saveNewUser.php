@@ -1,10 +1,10 @@
 <?php
-    foreach (glob("../models/*.php") as $filename)
+    foreach (glob(__DIR__."/../models/*.php") as $filename)
     {
         require_once $filename;
     }
 
-    require_once "mailer/sendEmail.php";
+    require_once __DIR__."/mailer/sendEmail.php";
 
     session_start();
 
