@@ -15,6 +15,7 @@
         die(json_encode(array("error"=>true, "msg"=>"Konto jest nieaktywne.")));
 
     if($user && !isset($_SESSION['user'])) {
+        $password .= ":".$user->getPasswordSalt();
         if(password_verify($password, $user->getPassword())) {
             $_SESSION['user'] = $user;
             die(json_encode(array("error"=>false)));
