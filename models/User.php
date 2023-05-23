@@ -34,15 +34,15 @@ class User extends Model {
     }
     
     public function getYubikeyData() {
-        return DbAdapter::queryObjects('yubikey_data', $id, 'id_user');
+        return DbAdapter::queryObjects('yubikey_data', $this->id, 'id_user');
     }
 
     public function getOTPData() {
-        return DbAdapter::queryObjects('otp_secrets', $id, 'id_user');
+        return DbAdapter::queryObjects('otp_secrets', $this->id, 'id_user');
     }
 
     public function getPasswords() {
-        return DbAdapter::queryObjects('vaults', $id, 'id_user');
+        return DbAdapter::queryObjects('passwords', $this->id, 'id_user');
     }
 
     public static function createUser($email, $password) {
