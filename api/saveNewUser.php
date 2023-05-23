@@ -8,8 +8,8 @@
 
     session_start();
 
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+    $email = $_POST['email'] ?? "";
+    $password = $_POST['password'] ?? "'";
 
     $user = User::createUser($email, $password);
     $result = $user->create();

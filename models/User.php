@@ -26,7 +26,7 @@ class User extends Model {
         }
     }
 
-    public function verifyUser($code) {
+    public function verifyUser() {
         $this->is_verified = true;
         DbAdapter::editAttributeInObject('users', 'is_verified', "1", $this->id, 'id');
         $this->updated = date('Y-m-d H:i:s');

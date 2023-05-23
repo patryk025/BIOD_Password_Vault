@@ -29,6 +29,9 @@ class Passwords extends Model {
         $instance->password = $password;
         $instance->created = date('Y-m-d H:i:s');
         $instance->updated = date('Y-m-d H:i:s');
+
+        $this->encryptPassword();
+
         return $instance;
     }
 
@@ -78,7 +81,21 @@ class Passwords extends Model {
         $user = DbAdapter::queryObject('users', $this->id_user);
 
         $key = $this->generateKey();
+        
+        $this->url = $this->encryptData($this->url, $key);
+        $this->login = $this->encryptData($this->login, $key);
+        $this->password = $this->encryptData($this->password, $key);
+        
+    }
 
+    private function decryptPassword() {
+        $user = DbAdapter::queryObject('users', $this->id_user);
+
+        $key = $this->generateKey();
+        
+        $this->url = $this->decryptData($this->url, $key);
+        $this->login = $this->decryptData($this->login, $key);
+        $this->password = $this->decryptData($this->password, $key);
         
     }
 }

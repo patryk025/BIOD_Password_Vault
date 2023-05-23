@@ -73,32 +73,35 @@ class DbAdapter {
         }
     }
 
-    public static function queryObject($table, $id) {
+    public static function queryObject($table, $id, $foreign_key = 'id') {
         $db = self::getDbConnection();
 
-        $query = "SELECT * FROM {$table} WHERE id = ?";
+        $query = "SELECT * FROM {$table} WHERE {$foreign_key} = ?";
         $statement = $db->prepare($query);
 
-        $statement->bind_param('i', $id);
+        $statement->bind_param('s', $id);
 
         try {
             $statement->execute();
             $result = $statement->get_result()->fetch_assoc();
 
-            $className = self::snakeToCamel($table);
-            if (!class_exists($className)) {
-                throw new Exception("Klasa {$className} nie istnieje.");
-            }
+            if($result != []) {
+                $className = self::snakeToCamel($table);
+                if (!class_exists($className)) {
+                    throw new Exception("Klasa {$className} nie istnieje.");
+                }
 
-            $object = new $className($result);
-            return $object;
+                $object = new $className($result);
+                return $object;
+            }
+            else return null;
         }
         catch(Exception $e) {
             return null;
         }
     }
 
-    public static function queryObjects($table, $id, $foreign_key) {
+    public static function queryObjects($table, $id, $foreign_key = 'id') {
         $db = self::getDbConnection();
 
         $query = "SELECT * FROM {$table} WHERE {$foreign_key} = ?";
@@ -127,12 +130,15 @@ class DbAdapter {
         }
     }
 
-    public static function removeObject($table, $object) {
+    public static function removeObject($table, $object, $foreign_key = 'id') {
         $db = self::getDbConnection();
 
-        $id = $object->getId();
+        if(!is_string($object))
+            $id = $object->getId();
+        else
+            $id = $object;
 
-        $query = "DELETE FROM {$table} WHERE id = ?";
+        $query = "DELETE FROM {$table} WHERE {$foreign_key} = ?";
         $statement = $db->prepare($query);
         $statement->bind_param('i', $id);
         try {
@@ -145,12 +151,15 @@ class DbAdapter {
     }
 
     private static function snakeToCamel($input) {
-        /*$parts = explode("_", $input);
-        $result = "";
-        foreach($parts as $part) {
-            $result .= ucfirst($part);
+        /* druciarstwo */
+        switch($input) {
+            case "users":
+                $input = "user";
+                break;
+            case "otp_secrets":
+                $input = "otp_secret";
+                break;
         }
-        return $result;*/
         return ucfirst(str_replace('_', '', ucwords($input, '_')));
     }
 }

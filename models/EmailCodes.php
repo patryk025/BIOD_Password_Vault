@@ -29,10 +29,10 @@ class EmailCodes extends Model {
         
         $instance->valid_from = new DateTime(); 
 
-        $valid_to = clone $this->valid_from; 
+        $valid_to = clone $instance->valid_from; 
         $valid_to->add(new DateInterval('PT15M'));
 
-        $instance->valid_from = $this->valid_from->format('Y-m-d H:i:s');
+        $instance->valid_from = $instance->valid_from->format('Y-m-d H:i:s');
         $instance->valid_to = $valid_to->format('Y-m-d H:i:s');
 
         return $instance;

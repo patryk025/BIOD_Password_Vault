@@ -113,24 +113,91 @@ $(document).ready(function() {
   $("#register_form").submit(function(event) {
     event.preventDefault(); // zapobiega domyślnej akcji formularza
 
-    var formData = $(this).serialize(); // zbiera dane z formularza
+    var emailIsValid = $("#registerEmail").hasClass('is-valid');
+    var passwordIsValid = $("#registerPassword").hasClass('is-valid');
+    var confirmPasswordIsValid = $("#registerPasswordConfirm").hasClass('is-valid');
 
-    $.ajax({
-        type: "POST",
-        url: "api/saveNewUser.php",
-        data: formData,
-        dataType: "json",
-        success: function(data) {
-          if(data.error)
-            bootstrap_alert(data.msg, "danger");
-          else
-            bootstrap_alert("Na podanego maila wysłano kod jednorazowy. Proszę postępować zgodnie z instrukcjami", "success");
-        },
-        error: function(data) {
-          bootstrap_alert("Wystąpił błąd, spróbuj ponownie później", "danger");
-        }
-    });
-});
+    // sprawdzanie, czy wszystkie pola są poprawne
+    if (!(emailIsValid && passwordIsValid && confirmPasswordIsValid)) {
+      bootstrap_alert("Proszę poprawić błędy w formularzu przed wysłaniem", "warning");
+    }
+    else {
+      var formData = $(this).serialize(); // zbiera dane z formularza
+
+      $.ajax({
+          type: "POST",
+          url: "api/saveNewUser.php",
+          data: formData,
+          dataType: "json",
+          success: function(data) {
+            if(data.error)
+              bootstrap_alert(data.msg, "danger");
+            else
+              bootstrap_alert("Na podanego maila wysłano kod jednorazowy. Proszę postępować zgodnie z instrukcjami", "success");
+          },
+          error: function(data) {
+            bootstrap_alert("Wystąpił błąd, spróbuj ponownie później", "danger");
+          }
+      });
+    }
+  });
+  $("#registerPassword, #registerPasswordConfirm").on('input', function(e) {
+    var password = $("#registerPassword").val();
+    var confirmPassword = $("#registerPasswordConfirm").val();
+    $("#registerPassword").removeClass('is-valid');
+    if (password !== confirmPassword || password == "") {
+      $("#registerPasswordConfirm").addClass('is-invalid');
+      $("#registerPasswordConfirm").removeClass('is-valid');
+      $("#registerPassword").removeClass('is-valid');
+      $(".password_error").text("Hasła nie są takie same");
+    } else {
+      $("#registerPasswordConfirm").removeClass('is-invalid');
+      $("#registerPassword").addClass('is-valid');
+      $("#registerPasswordConfirm").addClass('is-valid');
+      $(".password_error").text("");
+    }
+  });
+  $("#registerEmail").on('input', function(e) {
+    var email = $("#registerEmail").val();
+    // RegEx pattern for email validation
+    var emailPattern = /^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailPattern.test(email)) {
+      $("#registerEmail").addClass('is-invalid'); //Bootstrap 4 invalid class
+      $("#registerEmail").removeClass('is-valid');
+      $(".email_error").text("Niepoprawny adres email"); //Display error message
+    } else {
+      $("#registerEmail").removeClass('is-invalid');
+      $("#registerEmail").addClass('is-valid');
+      $(".email_error").text(""); //Clear error message
+    }
+  });
+  $("#registerPassword").on("keyup", function() {
+    var password = $(this).val();
+    var result = zxcvbn(password);
+    
+    switch(result.score) {
+      case 0:
+        $("#passwordStrengthInfo").text("Hasło bardzo słabe");
+        break;
+      case 1:
+        $("#passwordStrengthInfo").text("Hasło słabe");
+        break;
+      case 2:
+        $("#passwordStrengthInfo").text("Hasło średnie");
+        break;
+      case 3:
+        $("#passwordStrengthInfo").text("Hasło silne");
+        break;
+      case 4:
+        $("#passwordStrengthInfo").text("Hasło bardzo silne");
+        break;
+    }
+    
+    // Zaktualizuj pasek postępu siły hasła
+    var strengthPercentage = result.score * 25;
+    $("#passwordStrengthIndicator").css("width", strengthPercentage + "%").attr("aria-valuenow", strengthPercentage);
+  });
 });
 
 function bootstrap_alert(message, alertType = "warning") {
@@ -143,6 +210,7 @@ function bootstrap_alert(message, alertType = "warning") {
   $('#alertModal').modal('show');
 }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-6">
@@ -153,6 +221,7 @@ function bootstrap_alert(message, alertType = "warning") {
             <div class="mb-3">
               <label for="registerEmail" class="form-label">Email</label>
               <input type="email" class="form-control" id="registerEmail" name="email" required>
+              <span class="email_error text-danger"></span>
             </div>
             <div class="mb-3">
               <label for="registerPassword" class="form-label">Hasło</label>
@@ -161,6 +230,16 @@ function bootstrap_alert(message, alertType = "warning") {
             <div class="mb-3">
               <label for="registerPasswordConfirm" class="form-label">Potwierdź hasło</label>
               <input type="password" class="form-control" id="registerPasswordConfirm" name="password_confirm" required>
+              <span class="password_error text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <span>Siła hasła:</span>
+            </div>
+            <div class="mb-3 progress">
+              <div id="passwordStrengthIndicator" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="mb-3">
+              <div id="passwordStrengthInfo"></div>
             </div>
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="enable2FA">
