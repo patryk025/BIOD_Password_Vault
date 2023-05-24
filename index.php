@@ -37,14 +37,14 @@ require("header.php");
         border: none;
         padding: 5px 10px;
         text-decoration: none;
-        color: #ffffff;
-        background-color: #007bff;
+        color: #007bff;
+        background-color: #ffffff;
         border-radius: 5px;
         transition: background-color 0.3s;
     }
 
     .btn-edit:hover, .btn-delete:hover, .btn-reveal:hover {
-        background-color: #0056b3;
+        color: #0056b3;
     }
 </style>
 <script>
@@ -93,7 +93,15 @@ require("header.php");
             columns: [
                 { data: 'portal', title: 'Portal' },
                 { data: 'login', title: 'Login' },
-                { data: 'password', title: 'Hasło' },
+                { data: 'password', title: 'Hasło', 
+                    render: function(data, type, row) {
+                        if (type === 'display') {
+                            return '*'.repeat(8);
+                        } else {
+                            return data;
+                        }
+                    } 
+                },
                 { data: null, defaultContent: '<a href="#" class="btn-edit"><i class="fas fa-edit"></i></a> <a href="#" class="btn-delete"><i class="fas fa-trash-alt"></i></a> <a href="#" class="btn-reveal"><i class="fas fa-eye"></i></a>' }
             ],
             language: {
@@ -119,9 +127,22 @@ require("header.php");
                 }
             }
         });
-        $(".btn-edit, .btn-delete, .btn-reveal").click(function(e) {
+        $('#password_table').on('click', '.btn-reveal', function(e) {
             e.preventDefault();
-            // tutaj kod, który ma zostać wykonany po kliknięciu
+            var table = $('#password_table').DataTable();
+            var tr = $(this).closest('tr');
+            var td = tr.find('td').eq(2);
+            var row = table.row(tr);
+            var data = row.data();
+
+            if ($(this).hasClass('revealed')) {
+                td.text('*'.repeat(8));
+                $(this).find('svg').removeClass('fa-eye-slash').addClass('fa-eye');
+            } else {
+                td.text(data.password);
+                $(this).find('svg').removeClass('fa-eye').addClass('fa-eye-slash');
+            }
+            $(this).toggleClass('revealed');
         });
     });
 </script>
@@ -159,6 +180,53 @@ require("header.php");
             </div>
         </div>
     </div>
+    <div class="modal" tabindex="-1" id="passwordModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Dodaj/Edytuj hasło</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="passwordForm">
+          <div class="mb-3">
+            <label for="portal" class="form-label">Portal</label>
+            <input type="text" class="form-control" id="portal" required>
+          </div>
+          <div class="mb-3">
+            <label for="login" class="form-label">Login</label>
+            <input type="text" class="form-control" id="login" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Hasło</label>
+            <input type="password" class="form-control" id="password" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+        <button type="button" class="btn btn-primary" id="savePassword">Zapisz</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal" tabindex="-1" id="deletePasswordModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Usuń hasło</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Czy na pewno chcesz usunąć to hasło?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+        <button type="button" class="btn btn-danger" id="confirmDelete">Usuń</button>
+      </div>
+    </div>
+  </div>
+</div>
 <?php
 require("footer.php");
 ?>
