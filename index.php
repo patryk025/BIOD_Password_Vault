@@ -144,6 +144,69 @@ require("header.php");
             }
             $(this).toggleClass('revealed');
         });
+
+        $('#password_table').on('click', '.btn-edit', function() {
+            var data = $('#password_table').DataTable().row($(this).parents('tr')).data();
+            
+            $('#portal').val(data.portal);
+            $('#login').val(data.login);
+            $('#password').val(data.password);
+            
+            $('#passwordModalTitle').text('Edytuj hasło');
+
+            $('#passwordModal').modal('show');
+        });
+
+        $('#password_table').on('click', '.btn-delete', function() {
+            var data = $('#password_table').DataTable().row($(this).parents('tr')).data();
+
+            $('#deleteModal').data('id', data.id);
+            
+            $('#deleteModal').modal('show');
+        });
+
+        $('#addPassword').on('click', function() {
+            $('#passwordForm').trigger('reset');
+            $('#passwordModalTitle').text('Dodaj hasło');
+            $('#passwordModal').modal('show');
+        });
+
+        $('#savePassword').on('click', function() {
+            var formData = {
+                portal: $('#portal').val(),
+                login: $('#login').val(),
+                password: $('#password').val()
+            };
+            
+            $.ajax({
+                url: 'api/passwords.php',
+                method: 'POST',
+                data: formData,
+                success: function() {
+                    $('#passwordModal').modal('hide');
+                    $('#password_table').DataTable().ajax.reload();
+                },
+                error: function() {
+                    console.error('Wystąpił błąd podczas zapisywania hasła.');
+                }
+            });
+        });
+
+        $('#confirmDelete').on('click', function() {
+            var id = $('#deleteModal').data('id');
+            
+            $.ajax({
+                url: 'api/passwords.php?id='+id,
+                method: 'DELETE',
+                success: function() {
+                    $('#deleteModal').modal('hide');
+                    $('#password_table').DataTable().ajax.reload();
+                },
+                error: function() {
+                    console.error('Wystąpił błąd podczas usuwania hasła.');
+                }
+            });
+        });
     });
 </script>
 <style href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css"></style>
@@ -173,6 +236,7 @@ require("header.php");
             </div>
             <div class="col-md-9">
                 <div id="content1" class="content-pane active">
+                    <button type="button" class="btn btn-primary" id="addPassword">Dodaj hasło</button>
                     <table id="password_table" class="display" style="width:100%"></table>
                 </div>
                 <div id="content2" class="content-pane">Treść dla Metod autoryzacji</div>
@@ -184,7 +248,7 @@ require("header.php");
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Dodaj/Edytuj hasło</h5>
+        <h5 class="modal-title" id="passwordModalTitle">Dodaj/Edytuj hasło</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

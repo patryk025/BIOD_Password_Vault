@@ -80,7 +80,7 @@ class Passwords extends Model {
     private function encryptPassword() {
         $user = DbAdapter::queryObject('users', $this->id_user);
 
-        $key = $this->generateKey();
+        $key = $this->generateKey($user);
         
         $this->url = $this->encryptData($this->url, $key);
         $this->login = $this->encryptData($this->login, $key);
@@ -91,7 +91,7 @@ class Passwords extends Model {
     private function decryptPassword() {
         $user = DbAdapter::queryObject('users', $this->id_user);
 
-        $key = $this->generateKey();
+        $key = $this->generateKey($user);
         
         $this->url = $this->decryptData($this->url, $key);
         $this->login = $this->decryptData($this->login, $key);
