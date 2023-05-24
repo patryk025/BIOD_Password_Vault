@@ -30,7 +30,7 @@ class Passwords extends Model {
         $instance->created = date('Y-m-d H:i:s');
         $instance->updated = date('Y-m-d H:i:s');
 
-        $this->encryptPassword();
+        $instance->encryptPassword();
 
         return $instance;
     }
@@ -97,5 +97,89 @@ class Passwords extends Model {
         $this->login = $this->decryptData($this->login, $key);
         $this->password = $this->decryptData($this->password, $key);
         
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function setId($id): self
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    public function getIdUser()
+    {
+        return $this->id_user;
+    }
+
+    public function setIdUser($id_user): self
+    {
+        $this->id_user = $id_user;
+
+        return $this;
+    }
+
+    public function getUrl()
+    {
+        return $this->url;
+    }
+
+    public function setUrl($url): self
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    public function getLogin()
+    {
+        return $this->login;
+    }
+
+    public function setLogin($login): self
+    {
+        $this->login = $login;
+
+        return $this;
+    }
+
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    public function setPassword($password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    public function getCreated()
+    {
+        return $this->created;
+    }
+
+    public function setCreated($created): self
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    public function getChanged()
+    {
+        return $this->changed;
+    }
+
+    public function setChanged($changed): self
+    {
+        $this->changed = $changed;
+
+        return $this;
     }
 }
