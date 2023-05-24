@@ -145,7 +145,8 @@ require("header.php");
             $(this).toggleClass('revealed');
         });
 
-        $('#password_table').on('click', '.btn-edit', function() {
+        $('#password_table').on('click', '.btn-edit', function(e) {
+            e.preventDefault();
             var data = $('#password_table').DataTable().row($(this).parents('tr')).data();
             
             $('#portal').val(data.portal);
@@ -157,12 +158,15 @@ require("header.php");
             $('#passwordModal').modal('show');
         });
 
-        $('#password_table').on('click', '.btn-delete', function() {
+        $('#password_table').on('click', '.btn-delete', function(e) {
+            e.preventDefault();
             var data = $('#password_table').DataTable().row($(this).parents('tr')).data();
 
-            $('#deleteModal').data('id', data.id);
+            console.log(data);
+
+            $('#deletePasswordModal').data('id', data.id);
             
-            $('#deleteModal').modal('show');
+            $('#deletePasswordModal').modal('show');
         });
 
         $('#addPassword').on('click', function() {

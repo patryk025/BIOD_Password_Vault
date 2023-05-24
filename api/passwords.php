@@ -36,6 +36,7 @@ switch($_SERVER['REQUEST_METHOD']) {
         $passwords_json = [];
         foreach($passwords as $password) {
             $tmp_obj = [];
+            $tmp_obj['id'] = $password->getId(); 
             $tmp_obj['portal'] = $password->getUrl(); 
             $tmp_obj['login'] = $password->getLogin(); 
             $tmp_obj['password'] = $password->getPassword(); 
@@ -46,15 +47,20 @@ switch($_SERVER['REQUEST_METHOD']) {
     case 'POST':
         $password = Passwords::createPassword($user->getId(), $_POST['portal'], $_POST['login'], $_POST['password']);
         $result = $password->create();
-        if($result) {
+        if($result == true) {
+            echo json_encode(array("error"=>false));
+        }
+        else {
+            echo json_encode(array("error"=>true, "msg"=>"Wystąpił błąd podczas edytowania hasła"));
+        }
+        break;
+    case 'DELETE':
+        if(DbAdapter::removeObject('passwords', $_GET['id']) == true) {
             echo json_encode(array("error"=>false));
         }
         else {
             echo json_encode(array("error"=>true, "msg"=>"Wystąpił błąd podczas usuwania hasła"));
         }
-        break;
-    case 'DELETE':
-        DbAdapter::removeObject('passwords', $_GET['id']);
         break;
     default:
         header('HTTP/1.0 405 Method Not Allowed');

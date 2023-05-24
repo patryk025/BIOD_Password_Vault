@@ -55,12 +55,12 @@ class Passwords extends Model {
     }
 
     private function generateKey($user) {
-        $user_data = $user->getId() . $user->getPassword() . $user->getPasswordSalt() . $user->getUpdated() . $user->getCreated . $user->getUpdated();
+        $user_data = $user->getId() . $user->getPassword() . $user->getPasswordSalt() . $user->getUpdated() . $user->getCreated();
 
         $key = strrev($user_data);
-        $key = scrambleString($key);
+        $key = $this->scrambleString($key);
         $key = hash('sha256', $key);
-        $key = scrambleString($key);
+        $key = $this->scrambleString($key);
         $key = strrev($key);
         return $key;
     }
