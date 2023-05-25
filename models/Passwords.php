@@ -54,7 +54,7 @@ class Passwords extends Model {
         return $decrypted;
     }
 
-    private function generateKey($user) {
+    public function generateKey($user) {
         $user_data = $user->getId() . $user->getPassword() . $user->getPasswordSalt() . $user->getUpdated() . $user->getCreated();
 
         $key = strrev($user_data);
