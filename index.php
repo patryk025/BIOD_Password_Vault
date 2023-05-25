@@ -50,61 +50,6 @@ require("header.php");
     }
 </style>
 <script>
-    function stringToUint8Array(string) {
-        var stringBytes = new Uint8Array(string.length / 2);
-        for (var i = 0; i < string.length; i += 2) {
-            stringBytes[i / 2] = parseInt(string.substring(i, i + 2), 16);
-        }
-        return stringBytes;
-    }
-
-    function base64ToUint8Array(base64) {
-        const binaryString = atob(base64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        return bytes;
-    }
-
-    async function decryptData(data, key) {
-        const dataBytes = base64ToUint8Array(data);
-        let iv = dataBytes.slice(0, 16);
-        const encryptedBytes = dataBytes.slice(16);
-
-        var keyBytes = stringToUint8Array(key);
-
-        console.log("keyBytes", keyBytes);
-        console.log("encryptedBytes", encryptedBytes);
-        console.log("iv", iv);
-        
-        try {
-            const decodedKey = await window.crypto.subtle.importKey(
-                "raw", 
-                keyBytes.buffer, 
-                "AES-CBC", 
-                false, 
-                ["decrypt"]
-            );
-
-            console.log("decodedKey", decodedKey);
-
-            const decrypted = await window.crypto.subtle.decrypt(
-                { name: "AES-CBC", iv: iv.buffer },
-                decodedKey, 
-                encryptedBytes.buffer
-            );
-
-            return new TextDecoder().decode(decrypted);
-        } catch (error) {
-            console.error("Błąd podczas dekodowania danych:", error);
-        }
-
-        return data;
-    }
-
-    var key = "<?php echo $dec_key; ?>"; //TODO: przyznaje, jest to dość mocno niebezpieczne zagnieżdżać klucz w zmiennej.
-
     $(document).ready(function() {
         $.ajaxSetup({
             headers : {
@@ -119,70 +64,49 @@ require("header.php");
             targetPane.addClass('active');
         });
 
-        $.ajax({
-            url: 'api/passwords.php',
-            method: 'GET',
-            dataType: 'json',
-            success: function(json) {
-                let decryptionPromises = json.passwords.map(password => {
-                    return $.when(
-                        decryptData(password.portal, key),
-                        decryptData(password.login, key),
-                        decryptData(password.password, key)
-                    ).then(function(decryptedPortal, decryptedLogin, decryptedPassword) {
-                        return {
-                            ...password,
-                            portal: decryptedPortal,
-                            login: decryptedLogin,
-                            password: decryptedPassword
-                        };
-                    });
-                });
-
-                $.when(...decryptionPromises).then(function(...decryptedPasswords) {
-                    json.passwords = decryptedPasswords;
-                    
-                    // teraz możemy inicjować DataTables
-                    $('#password_table').DataTable({
-                        data: json.passwords,
-                        columns: [
-                            { data: 'portal', title: 'Portal' },
-                            { data: 'login', title: 'Login' },
-                            { data: 'password', title: 'Hasło', 
-                                render: function(data, type, row) {
-                                    if (type === 'display') {
-                                        return '*'.repeat(8);
-                                    } else {
-                                        return data;
-                                    }
-                                } 
-                            },
-                            { data: null, defaultContent: '<a href="#" class="btn-edit"><i class="fas fa-edit"></i></a> <a href="#" class="btn-delete"><i class="fas fa-trash-alt"></i></a> <a href="#" class="btn-reveal"><i class="fas fa-eye"></i></a>' }
-                        ],
-                        language: {
-                            processing:     "Przetwarzanie...",
-                            search:         "Szukaj:",
-                            lengthMenu:     "Pokaż _MENU_ pozycji",
-                            info:           "Pozycje od _START_ do _END_ z _TOTAL_ łącznie",
-                            infoEmpty:      "Pozycji 0 z 0 dostępnych",
-                            infoFiltered:   "(filtrowanie spośród _MAX_ dostępnych pozycji)",
-                            infoPostFix:    "",
-                            loadingRecords: "Wczytywanie...",
-                            zeroRecords:    "Nie znaleziono pasujących pozycji",
-                            emptyTable:     "Brak danych",
-                            paginate: {
-                                first:      "Pierwsza",
-                                previous:   "Poprzednia",
-                                next:       "Następna",
-                                last:       "Ostatnia"
-                            },
-                            aria: {
-                                sortAscending:  ": aktywuj, by posortować kolumnę rosnąco",
-                                sortDescending: ": aktywuj, by posortować kolumnę malejąco"
-                            }
+        $('#password_table').DataTable({
+            ajax: {
+                url: 'api/passwords.php',
+                dataSrc: "passwords",
+                error: function(xhr, error, thrown) {
+                    console.log('Wystąpił błąd: ' + error);
+                }
+            },
+            columns: [
+                { data: 'portal', title: 'Portal' },
+                { data: 'login', title: 'Login' },
+                { data: 'password', title: 'Hasło', 
+                    render: function(data, type, row) {
+                        if (type === 'display') {
+                            return '*'.repeat(8);
+                        } else {
+                            return data;
                         }
-                    });
-                });
+                    } 
+                },
+                { data: null, defaultContent: '<a href="#" class="btn-edit"><i class="fas fa-edit"></i></a> <a href="#" class="btn-delete"><i class="fas fa-trash-alt"></i></a> <a href="#" class="btn-reveal"><i class="fas fa-eye"></i></a>' }
+            ],
+            language: {
+                processing:     "Przetwarzanie...",
+                search:         "Szukaj:",
+                lengthMenu:     "Pokaż _MENU_ pozycji",
+                info:           "Pozycje od _START_ do _END_ z _TOTAL_ łącznie",
+                infoEmpty:      "Pozycji 0 z 0 dostępnych",
+                infoFiltered:   "(filtrowanie spośród _MAX_ dostępnych pozycji)",
+                infoPostFix:    "",
+                loadingRecords: "Wczytywanie...",
+                zeroRecords:    "Nie znaleziono pasujących pozycji",
+                emptyTable:     "Brak danych",
+                paginate: {
+                    first:      "Pierwsza",
+                    previous:   "Poprzednia",
+                    next:       "Następna",
+                    last:       "Ostatnia"
+                },
+                aria: {
+                    sortAscending:  ": aktywuj, by posortować kolumnę rosnąco",
+                    sortDescending: ": aktywuj, by posortować kolumnę malejąco"
+                }
             }
         });
         $('#password_table').on('click', '.btn-reveal', function(e) {

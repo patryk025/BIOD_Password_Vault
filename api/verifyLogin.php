@@ -20,6 +20,36 @@
 
         $password .= ":".$user->getPasswordSalt();
         if(password_verify($password, $user->getPassword())) {
+            if (count($yubikeys) > 0) {
+                if(!isset($_SESSION['yubi_verified']))
+                    die(json_encode(array("error"=>false, "auth_method"=>"yubikey")));
+            } else if (count($otps) > 0) {
+                if(!isset($_SESSION['otp_verified']))
+                    die(json_encode(array("error"=>false, "auth_method"=>"google_authenticator")));
+            } else {
+                if(!isset($_POST['email_code'])) {
+                    if(sendOneTimeCode($user)) {
+                        die(json_encode(array("error"=>false, "auth_method"=>"email")));
+                    }
+                    else {
+                        die(json_encode(array("error"=>true, "msg"=>"Wystąpił problem z wysłaniem maila z kodem")));
+                    }
+                }
+                else {
+                    $email_codes = DbAdapter::queryObjects('email_codes', $user->getId(), 'id_user');
+                    $email_codes = array_reverse($email_codes);
+
+                    if(count($email_codes) >= 1) {
+                        $email_code = $email_codes[0];
+                        $code = $email_code->getValidCode();
+                        if($_POST['email_code'] != $code || strtotime($email_code->getValidTo()) < time()) 
+                            die(json_encode(array("error"=>true, "msg"=>"Nieprawidłowy kod z maila")));
+                        else
+                            DbAdapter::removeObject('email_codes', $user->getId(), 'id_user');
+                    }
+                }
+            }
+            
             $_SESSION['user'] = $user;
             die(json_encode(array("error"=>false)));
         }

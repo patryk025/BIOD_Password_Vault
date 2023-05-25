@@ -64,7 +64,8 @@ function sendOneTimeCode($user, $uniqueId = null) {
     $alt_message = str_replace('{unique_id}', $uniqueId, $alt_message);
 
     if(sendMail($user->getEmail(), $subject, $message, $alt_message)) {
-        DbAdapter::insertObject('email_codes', EmailCodes::createEmail($user, $uniqueId, $otp));        
+        DbAdapter::insertObject('email_codes', EmailCodes::createEmail($user, $uniqueId, $otp));
+        return true;
     }
     else {
         return false;

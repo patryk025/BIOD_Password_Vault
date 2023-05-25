@@ -77,7 +77,7 @@ class Passwords extends Model {
         return $string;
     }
 
-    private function encryptPassword() {
+    public function encryptPassword() {
         $user = DbAdapter::queryObject('users', $this->id_user);
 
         $key = $this->generateKey($user);
@@ -88,7 +88,7 @@ class Passwords extends Model {
         
     }
 
-    private function decryptPassword() {
+    public function decryptPassword() {
         $user = DbAdapter::queryObject('users', $this->id_user);
 
         $key = $this->generateKey($user);

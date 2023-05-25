@@ -1,31 +1,21 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/node-forge@1.0.0/dist/forge.min.js"></script>
 <?php
-
-foreach (glob(__DIR__."/models/*.php") as $filename)
-{
-    require_once $filename;
-}
-
-session_start();
-
-$user = $_SESSION['user'];
-
-$key = $user->getPasswords()[0]->generateKey($user);
-
 echo "PHP:";
+$data = "Hello, World!";
 $method = "AES-256-CBC";
+$key = bin2hex(openssl_random_pseudo_bytes(32));
 $ivlen = openssl_cipher_iv_length($method);
 $iv = openssl_random_pseudo_bytes($ivlen);
 
-$encrypted_base64 = base64_encode("YVoeS/romuOZpZt/RCiluHiDg9tKjQKOZZIJ10JzJko=");
+$encrypted = openssl_encrypt($data, $method, hex2bin($key), OPENSSL_RAW_DATA, $iv);
+$encrypted_base64 = base64_encode($iv.$encrypted);
 
-$data = base64_decode($encrypted_base64);
-
-$iv = substr($data, 0, $ivlen);
-$encrypted = substr($data, $ivlen);
-$decrypted = openssl_decrypt($encrypted, $method, hex2bin($key), OPENSSL_RAW_DATA, $iv);
-    
+echo "Dane do szyfrowania: $data<br>";
 echo "Klucz: $key<br>";
 echo "Szyfrowane dane (base64): $encrypted_base64<br>";
+
+$decrypted = openssl_decrypt(substr(base64_decode($encrypted_base64), $ivlen), $method, hex2bin($key), OPENSSL_RAW_DATA, substr(base64_decode($encrypted_base64), 0, $ivlen));
 
 echo "Deszyfrowane dane: $decrypted<br>";
 ?>
@@ -33,6 +23,7 @@ echo "Deszyfrowane dane: $decrypted<br>";
 <?php
 echo "var key = '$key';\n";
 echo "var encrypted = '$encrypted_base64';\n";
+
 ?>
 
 function hexToBytes(hex) {

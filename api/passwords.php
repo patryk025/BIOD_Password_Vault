@@ -35,6 +35,7 @@ switch($_SERVER['REQUEST_METHOD']) {
         $passwords = $user->getPasswords();
         $passwords_json = [];
         foreach($passwords as $password) {
+            $password->decryptPassword();
             $tmp_obj = [];
             $tmp_obj['id'] = $password->getId(); 
             $tmp_obj['portal'] = $password->getUrl(); 

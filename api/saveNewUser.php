@@ -50,15 +50,12 @@
         $yubi = YubikeyData::createYubikey($user, $yubi_pubkey, $yubi_cert, $yubi_cert_issuer, $yubi_cert_subject);
         $result = $yubi->create();
         if(!is_bool($result)) {
-            if(isset($otp)) $otp->remove();
             $user->remove();
             die(json_encode(array("error"=>true, "msg"=>"Wystąpił błąd podczas operacji na bazie danych.")));
         }
     }
 
-    if(sendOneTimeCode($user)) {
-        if(isset($otp)) $otp->remove();
-        if(isset($yubi)) $yubi->remove();
+    if(!sendOneTimeCode($user)) {
         $user->remove();
         die(json_encode(array("error"=>true, "msg"=>"Wystąpił błąd podczas wysyłania wiadomości email. Spróbuj ponownie później.")));
     }
