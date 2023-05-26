@@ -102,13 +102,13 @@ function verifyEmail() {
         if(data.error) {
           $('#twoFactorCode').addClass('is-invalid');
           $('#twoFactorCode').next('.invalid-feedback').text(data.msg);
-        },
+        }
         else {
           $('#twoFactorCode').addClass('is-valid');
           $("#twoFactorCode").modal('hide');
           location.href = 'index.php'
         }
-      }
+      },
       error: function(data) {
         bootstrap_alert("Wystąpił błąd, spróbuj ponownie później", "danger");
       }
