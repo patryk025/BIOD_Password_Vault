@@ -9,7 +9,11 @@
     session_start();
 
     $email = $_POST['email'] ?? "";
-    $password = $_POST['password'] ?? "'";
+    $password = $_POST['password'] ?? "";
+    $password_confirm = $_POST['password_confirm'] ?? "";
+
+    if($password != $password_confirm)
+        die(json_encode(array("error"=>true, "msg"=>"Podane hasła nie są równe")));
 
     $user = User::createUser($email, $password);
     $result = $user->create();

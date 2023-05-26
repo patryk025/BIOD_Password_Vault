@@ -62,6 +62,8 @@ require("header.php");
         
         $('.list-group-item-action').click(function(e) {
             e.preventDefault();
+            $('.active').removeClass('active');
+            $(this).addClass('active');
             $('.content-pane').removeClass('active');
             var targetPane = $('#' + $(this).data('target'));
             targetPane.addClass('active');
@@ -196,7 +198,54 @@ require("header.php");
                 }
             });
         });
+
+        
+        $("#changePasswordForm").submit(function(event) {
+            event.preventDefault();
+
+            var formData = $(this).serialize();
+
+            $("#currentPassword").removeClass('is-invalid');
+            $("#newPassword").removeClass('is-invalid');
+            $("#confirmPassword").removeClass('is-invalid');
+
+            if($("#newPassword").val() == $("#confirmPassword").val()) {
+                $.ajax({
+                    type: "POST",
+                    url: "api/changePassword.php",
+                    data: formData,
+                    dataType: "json",
+                    success: function(data) {
+                        if(data.error) {
+                            $('#'+data.obj).addClass('is-invalid');
+                            $('#'+data.obj).next('.invalid-feedback').text(data.msg);
+                        }
+                        else {
+                            bootstrap_alert(data.msg, "success");
+                        }
+                    },
+                    error: function(data) {
+                        bootstrap_alert("Wystąpił błąd, spróbuj ponownie później", "danger");
+                    }
+                });
+            }
+            else {
+                $("#newPassword").addClass('is-invalid');
+                $("#confirmPassword").addClass('is-invalid');
+                $('#confirmPassword').next('.invalid-feedback').text("Podane hasła się nie zgadzają");
+            }
+        });
     });
+
+function bootstrap_alert(message, alertType = "warning") {
+  message = `
+      <div class="alert alert-${alertType} fade show" role="alert">
+          ${message}
+      </div>
+  `;
+  $('#alertModal').find('.modal-body').html(message);
+  $('#alertModal').modal('show');
+}
 </script>
 <style href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css"></style>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
@@ -229,7 +278,33 @@ require("header.php");
                     <table id="password_table" class="display" style="width:100%"></table>
                 </div>
                 <div id="content2" class="content-pane">Treść dla Metod autoryzacji</div>
-                <div id="content3" class="content-pane">Treść dla Ustawień konta</div>
+                <div id="content3" class="content-pane">
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-6">
+                                <h2 class="text-center">Zmiana hasła</h2>
+                                <form id="changePasswordForm">
+                                    <div class="mb-3">
+                                        <label for="currentPassword" class="form-label">Obecne hasło</label>
+                                        <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="newPassword" class="form-label">Nowe hasło</label>
+                                        <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="confirmPassword" class="form-label">Potwierdź nowe hasło</label>
+                                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Zmień hasło</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -276,6 +351,22 @@ require("header.php");
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
         <button type="button" class="btn btn-danger" id="confirmDelete">Usuń</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="alertModalLabel">Komunikat</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
       </div>
     </div>
   </div>

@@ -24,6 +24,10 @@ class DbAdapter {
     public static function insertObject($table, $object) {
         $db = self::getDbConnection();
 
+        if(method_exists($object, "setUpdated")) {
+            $object->setUpdated(date('Y-m-d H:i:s'));
+        }
+
         $reflector = new ReflectionClass(get_class($object));
         $properties = $reflector->getProperties(ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED);
 
@@ -54,6 +58,42 @@ class DbAdapter {
             return true;
         }
         catch(Exception $e) {
+            return $e->getCode();
+        }
+    }
+
+    public static function updateObject($table, $object) {
+        $db = self::getDbConnection();
+
+        if(method_exists($object, "setUpdated")) {
+            $object->setUpdated(date('Y-m-d H:i:s'));
+        }
+        
+        $reflector = new ReflectionClass(get_class($object));
+        $properties = $reflector->getProperties(ReflectionProperty::IS_PRIVATE | ReflectionProperty::IS_PROTECTED);
+
+        $columns = [];
+        $values = [];
+
+        foreach ($properties as $property) {
+            $property->setAccessible(true);
+            $propertyName = $property->getName();
+            if($propertyName != "yubikeyData" && $propertyName != "OTPData" && $propertyName != "id") {
+                $columns[] = $propertyName;
+                $values[] = $property->getValue($object);
+            }
+            $property->setAccessible(false);
+        }
+        $fieldList = implode('=?, ', $columns) . '=?';
+        
+        $query = "UPDATE `$table` SET $fieldList WHERE id = ?";
+        $stmt = $db->prepare($query);
+        
+        $values[] = $object->getId();
+        
+        try {
+            $stmt->execute($values);
+        } catch (PDOException $e) {
             return $e->getCode();
         }
     }

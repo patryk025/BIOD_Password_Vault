@@ -87,7 +87,7 @@ class User extends Model {
 
     public function setPassword($password): self
     {
-        $this->password = $password;
+        $this->password = password_hash($password.":".$this->password_salt, PASSWORD_DEFAULT);
 
         return $this;
     }

@@ -18,6 +18,10 @@ class Model {
         return DbAdapter::insertObject(self::camelToSnake(get_class($this)), $this);
     }
 
+    public function update() {
+        return DbAdapter::updateObject(self::camelToSnake(get_class($this)), $this);
+    }
+
     public function remove() {
         return DbAdapter::removeObject(self::camelToSnake(get_class($this)), $this);
     }

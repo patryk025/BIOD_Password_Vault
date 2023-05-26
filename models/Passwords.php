@@ -55,7 +55,7 @@ class Passwords extends Model {
     }
 
     public function generateKey($user) {
-        $user_data = $user->getId() . $user->getPassword() . $user->getPasswordSalt() . $user->getUpdated() . $user->getCreated();
+        $user_data = $user->getId() . $user->getPasswordSalt() . $user->getUpdated() . $user->getCreated();
 
         $key = strrev($user_data);
         $key = $this->scrambleString($key);
