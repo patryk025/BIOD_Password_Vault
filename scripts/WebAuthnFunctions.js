@@ -60,7 +60,7 @@ async function createRegistration() {
  * checks a FIDO2 registration
  * @returns {undefined}
  */
-async function checkRegistration() {
+async function checkRegistration(email) {
     try {
 
         if (!window.fetch || !navigator.credentials || !navigator.credentials.create) {
@@ -68,7 +68,7 @@ async function checkRegistration() {
         }
 
         // get check args
-        let rep = await window.fetch('api/u2f/WebAuthnServer.php?fn=getGetArgs' + getGetParams(), {method:'GET',cache:'no-cache'});
+        let rep = await window.fetch('api/u2f/WebAuthnServer.php?fn=getGetArgs&email=' + email + getGetParams(), {method:'GET',cache:'no-cache'});
         const getArgs = await rep.json();
 
         // error handling

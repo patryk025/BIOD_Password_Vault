@@ -34,6 +34,7 @@
  */
 
 require_once __DIR__.'/../../vendor/autoload.php';
+require_once __DIR__."/../../db/DbAdapter.php";
 
 use lbuchs\WebAuthn\WebAuthn;
 
@@ -161,6 +162,24 @@ try {
 
     } else if ($fn === 'getGetArgs') {
         $ids = [];
+
+        if(isset($_GET['email'])) {
+            $user = DbAdapter::queryObject('users', $_GET['email'], 'email');
+            $yubikey_data = $user->getYubikeyData()[0];
+
+            $_SESSION['registrations'] = [];
+
+            $yubi_data = (object) array();
+            $yubi_data->credentialPublicKey = $yubikey_data->getCredentialPublicKey();
+            $yubi_data->certificate = $yubikey_data->getCertificate();
+            $yubi_data->certificateIssuer = $yubikey_data->getCertificateIssuer();
+            $yubi_data->certificateSubject = $yubikey_data->getCertificateSubject();
+            $yubi_data->credentialId = $yubikey_data->getCredentialId();
+            $yubi_data->rpId = $yubikey_data->getRpId();
+            $yubi_data->userId = "00";
+
+            $_SESSION['registrations'][] = $yubi_data;
+        }
 
         if ($requireResidentKey) {
             if (!isset($_SESSION['registrations']) || !is_array($_SESSION['registrations']) || count($_SESSION['registrations']) === 0) {

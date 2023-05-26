@@ -1,0 +1,13 @@
+Witaj,
+
+Zauważyliśmy próbę logowania do konta.
+Proszę użyć poniższego kodu jednorazowego, aby potwierdzić ten adres e-mail. Ten kod wygaśnie po 15 minutach.
+
+{one_time_code}
+
+Jeśli to nie Ty się logowałeś, rozważ zmianę hasła.
+
+Z poważaniem,
+Twój Zespół
+
+© 2023 Twoja Firma. Wszelkie prawa zastrzeżone.

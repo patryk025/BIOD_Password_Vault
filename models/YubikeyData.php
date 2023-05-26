@@ -9,6 +9,8 @@ class YubikeyData extends Model {
     private $certificate;
     private $certificate_issuer;
     private $certificate_subject;
+    private $credential_id;
+    private $rp_id;
     private $created;
 
     public function __construct($fields = null) {
@@ -19,6 +21,8 @@ class YubikeyData extends Model {
             $this->certificate = $fields['certificate'];
             $this->certificate_issuer = $fields['certificate_issuer'];
             $this->certificate_subject = $fields['certificate_subject'];
+            $this->credential_id = $fields['credential_id'];
+            $this->rp_id = $fields['rp_id'];
             $this->created = $fields['created'];
         }
     }
@@ -107,15 +111,41 @@ class YubikeyData extends Model {
         return $this;
     }
 
-    public static function createYubikey($user, $credential_public_key, $certificate, $certificate_issuer, $certificate_subject) {
+    public static function createYubikey($user, $credential_public_key, $certificate, $certificate_issuer, $certificate_subject, $credential_id, $rp_id) {
         $instance = new self();
         $instance->id_user = $user->getId();
         $instance->credential_public_key = $credential_public_key;
         $instance->certificate = $certificate;
         $instance->certificate_issuer = $certificate_issuer;
         $instance->certificate_subject = $certificate_subject;
+        $instance->credential_id = base64_encode($credential_id);
+        $instance->rp_id = $rp_id;
         $instance->created = date('Y-m-d H:i:s');
         return $instance;
+    }
+
+    public function getCredentialId()
+    {
+        return base64_decode($this->credential_id);
+    }
+
+    public function setCredentialId($credential_id): self
+    {
+        $this->credential_id = base64_encode($credential_id);
+
+        return $this;
+    }
+
+    public function getRpId()
+    {
+        return $this->rp_id;
+    }
+
+    public function setRpId($rp_id): self
+    {
+        $this->rp_id = $rp_id;
+
+        return $this;
     }
 }
 ?>

@@ -20,7 +20,10 @@ $token = $_SESSION['token'];
 
 $user = $_SESSION['user'];
 
-$dec_key = $user->getPasswords()[0]->generateKey($user);
+if(count($user->getPasswords()) == 0)
+    $dec_key = (new Passwords())->generateKey($user);
+else
+    $dec_key = $user->getPasswords()[0]->generateKey($user);
 
 // Reszta kodu strony
 require("header.php");

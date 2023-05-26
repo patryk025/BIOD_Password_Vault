@@ -1,6 +1,7 @@
 <?php
     session_start();
     require(__DIR__."/../../vendor/autoload.php");
+    require_once __DIR__."/../../db/DbAdapter.php";
 
     header('Content-Type: application/json');
 
@@ -49,6 +50,10 @@
         echo json_encode($dataToSend);
     }
     else if($_GET['mode'] == "verify") {
+        if(isset($_POST['email'])) {
+            $user = DbAdapter::queryObject('users', $_POST['email'], 'email');
+            $_SESSION['otp_secret'] = $user->getOTPData()[0]->getEncryptedSecret();
+        }
         $otp = TOTP::createFromSecret($_SESSION['otp_secret']); // create TOTP object from the secret.
         $val_result = $otp->verify($_POST['code'], null, 10);
         $_SESSION['otp_confirmed'] = $val_result;

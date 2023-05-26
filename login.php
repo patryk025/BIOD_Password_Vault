@@ -1,5 +1,13 @@
 <?php
 require("header.php");
+session_start();
+
+if (isset($_SESSION['user'])) {
+  header('Location: index.php');
+  exit;
+}
+
+session_unset();
 ?>
 <script src="scripts/WebAuthnFunctions.js"></script>
 <script>
@@ -24,12 +32,14 @@ $(document).ready(function() {
                 verifyYubikey();
                 break;
               case "google_authenticator":
-                var autenticatorModal = new bootstrap.Modal($('#authenticatorModal'), {});
+                var autenticatorModal = new bootstrap.Modal($('#twoFactorModal'), {});
+                $("#twoFactorLabel").text("Podaj kod weryfikacyjny z Google Authenticator");
                 autenticatorModal.show();
                 second_factor = "gauth";
                 break;
               case "email":
-                var autenticatorModal = new bootstrap.Modal($('#authenticatorModal'), {});
+                var autenticatorModal = new bootstrap.Modal($('#twoFactorModal'), {});
+                $("#twoFactorLabel").text("Podaj kod weryfikacyjny z wiadomości e-mail");
                 autenticatorModal.show();
                 second_factor = "email";
                 break;
@@ -43,10 +53,58 @@ $(document).ready(function() {
         }
     });
   });
+
+  $('#verifyCodeButton').click(function() {
+    if(second_factor == "gauth")
+      verifyOTP();
+    else if(second_factor == "email")
+      verifyEmail()
+  });
+
+  $('#twoFactorCode').keypress(function(event){
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    if(keycode == '13'){
+      if(second_factor == "gauth")
+        verifyOTP();
+      else if(second_factor == "email")
+        verifyEmail()
+    }
+  });
 });
 
 function verifyYubikey() {
-  bootstrap_alert("Not supported yet", "danger");
+  checkRegistration($("#loginEmail").val()).then(function(response) {
+      if(response.error) {
+        switch(response.status) {
+          case "check_canceled": {
+            bootstrap_alert("Anulowano sprawdzanie Yubikeyem", "info");
+            break;
+          }
+          case "check_error": {
+            bootstrap_alert("Wystąpił błąd: "+response.message, "danger");
+          }
+        }
+      }
+      else {
+        if(response.status == "check_complete") {
+          var formData = $("#login_form").serialize(); // zbiera dane z formularza
+          formData += '&yubi_checked=true';
+          $.ajax({
+            type: "POST",
+            url: "api/verifyLogin.php",
+            data: formData,
+            dataType: "json",
+            success: function(data) {
+              if(data.error)
+                bootstrap_alert(data.msg, "danger");
+              else {
+                location.href = "index.php";
+              }
+            }
+          });
+        }
+      }
+    })
 }
 
 function verifyOTP() {
@@ -63,11 +121,24 @@ function verifyOTP() {
     $('#twoFactorCode').next('.invalid-feedback').text('Niepoprawna długość kodu, musi mieć 6 znaków.');
     return false;
   }
-  $.post("api/u2f/OtpInterface.php?mode=verify", {code: code}, function(result){
+  $.post("api/u2f/OtpInterface.php?mode=verify", {code: code, email: $("#loginEmail").val()}, function(result){
     if(result.valid) {
       $('#twoFactorCode').addClass('is-valid');
       $("#twoFactorCode").modal('hide');
-      location.href = 'index.php';
+      var formData = $("#login_form").serialize(); // zbiera dane z formularza
+      $.ajax({
+        type: "POST",
+        url: "api/verifyLogin.php",
+        data: formData,
+        dataType: "json",
+        success: function(data) {
+          if(data.error)
+            bootstrap_alert(data.msg, "danger");
+          else {
+            location.href = "index.php";
+          }
+        }
+      });
     }
     else {
       $('#twoFactorCode').addClass('is-invalid');
@@ -91,7 +162,7 @@ function verifyEmail() {
     $('#twoFactorCode').next('.invalid-feedback').text('Niepoprawna długość kodu, musi mieć 6 znaków.');
     return false;
   }
-  var formData = $(this).serialize();
+  var formData = $("#login_form").serialize();
   formData += '&email_code=' + encodeURIComponent(code);
   $.ajax({
       type: "POST",
@@ -175,21 +246,19 @@ function bootstrap_alert(message, alertType = "warning") {
         <h5 class="modal-title" id="twoFactorModalLabel">Weryfikacja dwuetapowa</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="two_factor_form" action="#" method="post">
-        <div class="modal-body">
-            <div class="mb-3">
-              <label for="twoFactorCode" class="form-label">Podaj kod weryfikacyjny</label>
-              <input type="text" class="form-control" id="twoFactorCode" name="twoFactorCode" required>
-              <div class="invalid-feedback">
-                
-              </div>
+      <div class="modal-body">
+          <div class="mb-3">
+            <label for="twoFactorCode" class="form-label" id="twoFactorLabel">Podaj kod weryfikacyjny</label>
+            <input type="text" class="form-control" id="twoFactorCode" name="twoFactorCode" required>
+            <div class="invalid-feedback">
+              
             </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-          <button type="submit" class="btn btn-primary" id="verifyCodeButton">Zweryfikuj</button>
-        </div>
-      </form>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+        <button type="submit" class="btn btn-primary" id="verifyCodeButton">Zweryfikuj</button>
+      </div>
     </div>
   </div>
 </div>

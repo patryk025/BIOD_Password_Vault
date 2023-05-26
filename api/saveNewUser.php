@@ -46,8 +46,10 @@
         $yubi_cert = $yubi_data->certificate;
         $yubi_cert_issuer = $yubi_data->certificateIssuer;
         $yubi_cert_subject = $yubi_data->certificateSubject;
+        $yubi_cred_id = $yubi_data->credentialId;
+        $yubi_rp_id = $yubi_data->rpId;
 
-        $yubi = YubikeyData::createYubikey($user, $yubi_pubkey, $yubi_cert, $yubi_cert_issuer, $yubi_cert_subject);
+        $yubi = YubikeyData::createYubikey($user, $yubi_pubkey, $yubi_cert, $yubi_cert_issuer, $yubi_cert_subject, $yubi_cred_id, $yubi_rp_id);
         $result = $yubi->create();
         if(!is_bool($result)) {
             $user->remove();

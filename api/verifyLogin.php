@@ -4,6 +4,8 @@
         require_once $filename;
     }
 
+    require_once __DIR__."/mailer/sendEmail.php";
+
     session_start();
 
     $username = $_POST['email'] ?? "";
@@ -21,14 +23,14 @@
         $password .= ":".$user->getPasswordSalt();
         if(password_verify($password, $user->getPassword())) {
             if (count($yubikeys) > 0) {
-                if(!isset($_SESSION['yubi_verified']))
+                if(!($_POST['yubi_checked'] ?? false))
                     die(json_encode(array("error"=>false, "auth_method"=>"yubikey")));
             } else if (count($otps) > 0) {
-                if(!isset($_SESSION['otp_verified']))
+                if(!($_SESSION['otp_confirmed'] ?? false))
                     die(json_encode(array("error"=>false, "auth_method"=>"google_authenticator")));
             } else {
                 if(!isset($_POST['email_code'])) {
-                    if(sendOneTimeCode($user)) {
+                    if(sendOneTimeCode($user, 0, "login")) {
                         die(json_encode(array("error"=>false, "auth_method"=>"email")));
                     }
                     else {
@@ -45,7 +47,7 @@
                         if($_POST['email_code'] != $code || strtotime($email_code->getValidTo()) < time()) 
                             die(json_encode(array("error"=>true, "msg"=>"Nieprawidłowy kod z maila")));
                         else
-                            DbAdapter::removeObject('email_codes', $user->getId(), 'id_user');
+                            DbAdapter::removeObject('email_codes', $user, 'id_user');
                     }
                 }
             }

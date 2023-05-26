@@ -45,7 +45,7 @@ function sendMail($email, $subject, $body, $alt_body) {
     }
 }
 
-function sendOneTimeCode($user, $uniqueId = null) {
+function sendOneTimeCode($user, $uniqueId = null, $template = "register") {
     $totp = TOTP::create();
     $otp = $totp->now();
     $uniqueId = $uniqueId ?? uniqid();
@@ -53,15 +53,24 @@ function sendOneTimeCode($user, $uniqueId = null) {
     $baseUrl = $_ENV['APP_URL'];
 
     $subject = 'Kod jednorazowy';
-    $message = file_get_contents(__DIR__."/templates/one_time_code.html");
-    $message = str_replace('{one_time_code}', $otp, $message);
-    $message = str_replace('{domain_name}', $baseUrl, $message);
-    $message = str_replace('{unique_id}', $uniqueId, $message);
+    if($template == "register") {
+        $message = file_get_contents(__DIR__."/templates/one_time_code.html");
+        $message = str_replace('{one_time_code}', $otp, $message);
+        $message = str_replace('{domain_name}', $baseUrl, $message);
+        $message = str_replace('{unique_id}', $uniqueId, $message);
 
-    $alt_message = file_get_contents(__DIR__."/templates/one_time_code.txt");
-    $alt_message = str_replace('{one_time_code}', $otp, $alt_message);
-    $alt_message = str_replace('{domain_name}', $baseUrl, $alt_message);
-    $alt_message = str_replace('{unique_id}', $uniqueId, $alt_message);
+        $alt_message = file_get_contents(__DIR__."/templates/one_time_code.txt");
+        $alt_message = str_replace('{one_time_code}', $otp, $alt_message);
+        $alt_message = str_replace('{domain_name}', $baseUrl, $alt_message);
+        $alt_message = str_replace('{unique_id}', $uniqueId, $alt_message);
+    }
+    else if($template == "login") {
+        $message = file_get_contents(__DIR__."/templates/login_otp.html");
+        $message = str_replace('{one_time_code}', $otp, $message);
+
+        $alt_message = file_get_contents(__DIR__."/templates/login_otp.txt");
+        $alt_message = str_replace('{one_time_code}', $otp, $alt_message);
+    }
 
     if(sendMail($user->getEmail(), $subject, $message, $alt_message)) {
         DbAdapter::insertObject('email_codes', EmailCodes::createEmail($user, $uniqueId, $otp));
