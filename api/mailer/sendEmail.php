@@ -52,8 +52,8 @@ function sendOneTimeCode($user, $uniqueId = null, $template = "register") {
     //$baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
     $baseUrl = $_ENV['APP_URL'];
 
-    $subject = 'Kod jednorazowy';
     if($template == "register") {
+        $subject = 'Rejestracja - kod jednorazowy';
         $message = file_get_contents(__DIR__."/templates/one_time_code.html");
         $message = str_replace('{one_time_code}', $otp, $message);
         $message = str_replace('{domain_name}', $baseUrl, $message);
@@ -63,23 +63,51 @@ function sendOneTimeCode($user, $uniqueId = null, $template = "register") {
         $alt_message = str_replace('{one_time_code}', $otp, $alt_message);
         $alt_message = str_replace('{domain_name}', $baseUrl, $alt_message);
         $alt_message = str_replace('{unique_id}', $uniqueId, $alt_message);
+
+        if(sendMail($user->getEmail(), $subject, $message, $alt_message)) {
+            DbAdapter::insertObject('email_codes', EmailCodes::createEmail($user, $uniqueId, $otp));
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     else if($template == "login") {
+        $subject = 'Logowanie - kod jednorazowy';
         $message = file_get_contents(__DIR__."/templates/login_otp.html");
         $message = str_replace('{one_time_code}', $otp, $message);
 
         $alt_message = file_get_contents(__DIR__."/templates/login_otp.txt");
         $alt_message = str_replace('{one_time_code}', $otp, $alt_message);
+
+        if(sendMail($user->getEmail(), $subject, $message, $alt_message)) {
+            DbAdapter::insertObject('email_codes', EmailCodes::createEmail($user, $uniqueId, $otp));
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if($template == "remember_password") {
+        $subject = 'Reset hasła';
+        $message = file_get_contents(__DIR__."/templates/remember_password.html");
+        $message = str_replace('{domain_name}', $baseUrl, $message);
+        $message = str_replace('{unique_id}', $uniqueId, $message);
+
+        $alt_message = file_get_contents(__DIR__."/templates/remember_password.txt");
+        $alt_message = str_replace('{domain_name}', $baseUrl, $alt_message);
+        $alt_message = str_replace('{unique_id}', $uniqueId, $alt_message);
+
+        if(sendMail($user->getEmail(), $subject, $message, $alt_message)) {
+            DbAdapter::insertObject('password_reset_prompt', PasswordResetPrompt::createResetPrompt($user, $uniqueId));
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
-    if(sendMail($user->getEmail(), $subject, $message, $alt_message)) {
-        DbAdapter::insertObject('email_codes', EmailCodes::createEmail($user, $uniqueId, $otp));
-        return true;
-    }
-    else {
-        return false;
-    }
-
+    return false;
 }
 
 ?>

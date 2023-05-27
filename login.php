@@ -216,7 +216,8 @@ function bootstrap_alert(message, alertType = "warning") {
             </div>
           </form>
           <div class="mb-3">
-            <span>Nie masz konta? Zarejestruj się <a href="register.php">tutaj</a></span>
+            <span>Nie masz konta? Zarejestruj się <a href="register.php">tutaj</a></span><br>
+            <span><a href="remember_password.php">Nie pamiętam hasła</a></span>
           </div>
         </div>
       </div>

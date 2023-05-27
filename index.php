@@ -277,7 +277,20 @@ function bootstrap_alert(message, alertType = "warning") {
                     <button type="button" class="btn btn-primary" id="addPassword">Dodaj hasło</button>
                     <table id="password_table" class="display" style="width:100%"></table>
                 </div>
-                <div id="content2" class="content-pane">Treść dla Metod autoryzacji</div>
+                <div id="content2" class="content-pane">
+                    <div class="mb-3 text-center" id="2FAMethods">
+                        <button type="button" class="btn btn-primary" id="googleAuthButton" data-toggle="modal" data-target="#authenticatorModal">
+                        Google Authenticator
+                        <span class="loading-icon" style="display: none;"><i class="fas fa-spinner fa-spin"></i></span>
+                        <span class="success-icon" style="display: none;"><i class="fas fa-check-circle"></i></span>
+                        </button>
+                        <button type="button" class="btn btn-primary" id="yubikeyButton">
+                        Yubikey
+                        <span class="loading-icon" style="display: none;"><i class="fas fa-spinner fa-spin"></i></span>
+                        <span class="success-icon" style="display: none;"><i class="fas fa-check-circle"></i></span>
+                        </button>
+                    </div>
+                </div>
                 <div id="content3" class="content-pane">
                     <div class="container">
                         <div class="row justify-content-center">
@@ -367,6 +380,36 @@ function bootstrap_alert(message, alertType = "warning") {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="authenticatorModal" tabindex="-1" aria-labelledby="authenticatorModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="authenticatorModalLabel">Google Authenticator</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="qrCodeContainer" class="mb-3 text-center">
+          
+        </div>
+        <div class="mb-3">
+          <label for="authenticatorSecret" class="form-label">lub przepisz sekret, jeśli nie działa skaner QR</label>
+          <input type="text" id="authenticatorSecret" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label for="authenticatorCode" class="form-label">Wpisz kod z aplikacji Google Authenticator</label>
+          <input type="text" id="authenticatorCode" class="form-control" required>
+          <div class="invalid-feedback">
+            
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="verifyCodeButton" class="btn btn-primary">Zatwierdź</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
       </div>
     </div>
   </div>
