@@ -25,7 +25,16 @@ if(count($user->getPasswords()) == 0)
 else
     $dec_key = $user->getPasswords()[0]->generateKey($user);
 
-// Reszta kodu strony
+if(!empty($user->getYubikeyData()))
+    $isYubiEnabled = true;
+else
+    $isYubiEnabled = false;
+
+if(!empty($user->getOTPData()))
+    $isGAuthEnabled = true;
+else
+    $isGAuthEnabled = false;
+
 require("header.php");
 ?>
 <style>
@@ -52,11 +61,89 @@ require("header.php");
         color: #0056b3;
     }
 </style>
+<script src="scripts/WebAuthnFunctions.js"></script>
 <script>
+    var isGoogleAuthenticatorEnabled = <?php echo $isGAuthEnabled ? "true" : "false"; ?>;
+    var isYubikeyAuthenticatorEnabled = <?php echo $isYubiEnabled ? "true" : "false"; ?>;
+
+    function switchGAuthButtons() {
+        if (!isGoogleAuthenticatorEnabled) {
+            $('#googleAuthButtonAdd').text("Dodaj");
+            $('#googleAuthButtonRemove').prop('disabled', true);
+        }
+        else {
+            $('#googleAuthButtonAdd').text("Zmień");
+            $('#googleAuthButtonRemove').prop('disabled', false);
+        }
+    }
+
+    function switchYubiButtons() {
+        if (!isYubikeyAuthenticatorEnabled) {
+            $('#yubikeyButtonAdd').text("Dodaj");
+            $('#yubikeyButtonRemove').prop('disabled', true);
+        }
+        else {
+            $('#yubikeyButtonAdd').text("Zmień");
+            $('#yubikeyButtonRemove').prop('disabled', false);
+        }
+    }
+
+    function verifyCode() {
+        var code = $("#authenticatorCode").val();
+        $('#authenticatorCode').removeClass('is-invalid');
+        $('#authenticatorCode').next('.invalid-feedback').text('');
+        if(code == "") {
+            $('#authenticatorCode').addClass('is-invalid');
+            $('#authenticatorCode').next('.invalid-feedback').text('Kod nie może być pusty, wprowadź kod.');
+            return false;
+        }
+        else if(code.length != 6) {
+            $('#authenticatorCode').addClass('is-invalid');
+            $('#authenticatorCode').next('.invalid-feedback').text('Niepoprawna długość kodu, musi mieć 6 znaków.');
+            return false;
+        }
+        $.post("api/u2f/OtpInterface.php?mode=verify", {code: code}, function(result){
+            if(result.valid) {
+                $('#authenticatorCode').addClass('is-valid');
+                $("#authenticatorModal").modal('hide');
+                $.post("api/u2f/saveChanges.php", {}, function(result){
+                    if(!result.error) {
+                        isGoogleAuthenticatorEnabled = true;
+                        switchGAuthButtons();
+                        bootstrap_alert("Zapisano zmiany w Google Authenticator", "success");
+                    }
+                    else {
+                        bootstrap_alert("Wystąpił błąd podczas zapisywania zmian", "danger");
+                        return false;
+                    }
+                });
+            }
+            else {
+                $('#authenticatorCode').addClass('is-invalid');
+                $('#authenticatorCode').next('.invalid-feedback').text('Kod jest niepoprawny, spróbuj jeszcze raz.');
+                return false;
+            }
+        });
+    }
+
     $(document).ready(function() {
         $.ajaxSetup({
             headers : {
                 'CsrfToken': '<?php echo $_SESSION['token']; ?>'
+            }
+        });
+
+        switchGAuthButtons();
+        switchYubiButtons();
+
+        $('#verifyCodeButton').click(function() {
+            verifyCode();
+        });
+
+        $('#authenticatorCode').keypress(function(event){
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if(keycode == '13'){
+            verifyCode()
             }
         });
         
@@ -235,6 +322,92 @@ require("header.php");
                 $('#confirmPassword').next('.invalid-feedback').text("Podane hasła się nie zgadzają");
             }
         });
+
+        $('#googleAuthButtonAdd').click(function() {
+            $.get( "api/u2f/OtpInterface.php?mode=register", function( data ) {
+                $("#authenticatorSecret").val(data.secret);
+                $('#qrCodeContainer').html("");
+                var img = $('<img>');
+                img.attr('src', "data:image/png;base64,"+data.qr_code);
+                img.appendTo('#qrCodeContainer');
+            });
+            var autenticatorModal = new bootstrap.Modal($('#authenticatorModal'), {});
+            autenticatorModal.show();
+        });
+
+        $('#yubikeyButtonAdd').click(function() {
+            createRegistration().then(function(response) {
+                if(response.error) {
+                    switch(response.status) {
+                        case "reg_canceled": {
+                            bootstrap_alert("Anulowano parowanie z Yubikeyem", "info");
+                            break;
+                        }
+                        case "reg_error": {
+                            bootstrap_alert("Wystąpił błąd: "+response.message, "danger");
+                        }
+                    }
+                }
+                else {
+                    if(response.status == "reg_complete") {
+                        $.post("api/u2f/saveChanges.php", {}, function(result){
+                            if(!result.error) {
+                                isYubikeyAuthenticatorEnabled = true;
+                                switchYubiButtons();
+                                bootstrap_alert("Zapisano zmiany w Yubikey", "success");
+                            }
+                            else {
+                                bootstrap_alert("Wystąpił błąd podczas zapisywania zmian", "danger");
+                                return false;
+                            }
+                        });
+                    }
+                }
+            })
+        });
+
+        $('#googleAuthButtonRemove').click(function() {
+            $.get( "api/u2f/OtpInterface.php?mode=remove", function( data ) {
+                if(!result.error) {
+                    isGoogleAuthenticatorEnabled = false;
+                    switchGAuthButtons();
+                    bootstrap_alert("Zapisano zmiany w Yubikey", "success");
+                }
+                else {
+                    bootstrap_alert("Wystąpił błąd podczas zapisywania zmian", "danger");
+                    return false;
+                }
+            });
+        });
+
+        $('#yubikeyButtonRemove').click(function() {
+            clearRegistration().then(function(response) {
+                if(response.error) {
+                    switch(response.status) {
+                        case "clear_error": {
+                            bootstrap_alert("Wystąpił błąd: "+response.message, "danger");
+                        }
+                    }
+                }
+                else {
+                    if(response.status == "clear_complete") {
+                        $.post("api/u2f/saveChanges.php", {}, function(result){
+                            if(!result.error) {
+                                isYubikeyAuthenticatorEnabled = false;
+                                switchYubiButtons();
+                                bootstrap_alert("Odłączono Yubikeya", "success");
+                            }
+                            else {
+                                bootstrap_alert("Wystąpił błąd podczas zapisywania zmian", "danger");
+                                return false;
+                            }
+                        });
+                    }
+                }
+            }).catch(err => {
+                bootstrap_alert(err, "danger");
+            });
+        });
     });
 
 function bootstrap_alert(message, alertType = "warning") {
@@ -279,16 +452,13 @@ function bootstrap_alert(message, alertType = "warning") {
                 </div>
                 <div id="content2" class="content-pane">
                     <div class="mb-3 text-center" id="2FAMethods">
-                        <button type="button" class="btn btn-primary" id="googleAuthButton" data-toggle="modal" data-target="#authenticatorModal">
-                        Google Authenticator
-                        <span class="loading-icon" style="display: none;"><i class="fas fa-spinner fa-spin"></i></span>
-                        <span class="success-icon" style="display: none;"><i class="fas fa-check-circle"></i></span>
-                        </button>
-                        <button type="button" class="btn btn-primary" id="yubikeyButton">
-                        Yubikey
-                        <span class="loading-icon" style="display: none;"><i class="fas fa-spinner fa-spin"></i></span>
-                        <span class="success-icon" style="display: none;"><i class="fas fa-check-circle"></i></span>
-                        </button>
+                        <h3 class="pt-3">Google Authenticator</h3>
+                        <button type="button" class="btn btn-primary" id="googleAuthButtonAdd">Dodaj</button>
+                        <button type="button" class="btn btn-primary" id="googleAuthButtonRemove">Usuń</button>
+
+                        <h3 class="pt-3">Yubikey</h3>
+                        <button type="button" class="btn btn-primary" id="yubikeyButtonAdd">Dodaj</button>
+                        <button type="button" class="btn btn-primary" id="yubikeyButtonRemove">Usuń</button>
                     </div>
                 </div>
                 <div id="content3" class="content-pane">

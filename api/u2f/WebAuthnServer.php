@@ -33,6 +33,11 @@
  * ------------------------------------------------------------
  */
 
+foreach (glob(__DIR__."/../models/*.php") as $filename)
+{
+    require_once $filename;
+}
+
 require_once __DIR__.'/../../vendor/autoload.php';
 require_once __DIR__."/../../db/DbAdapter.php";
 
@@ -236,6 +241,7 @@ try {
         if (!isset($_SESSION['registrations']) || !array_key_exists('registrations', $_SESSION) || !is_array($_SESSION['registrations'])) {
             $_SESSION['registrations'] = [];
         }
+        if(isset($_SESSION['user'])) $_SESSION['registrations'] = [];
         $_SESSION['registrations'][] = $data;
 
         $msg = 'registration success.';
@@ -306,6 +312,10 @@ try {
         $return = new stdClass();
         $return->success = true;
         $return->msg = 'all registrations deleted';
+
+        $user = $_SESSION['user'];
+
+        DbAdapter::removeObject("yubikey_data", $user, 'id_user');
 
         header('Content-Type: application/json');
         print(json_encode($return));

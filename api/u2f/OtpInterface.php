@@ -59,4 +59,8 @@
         $_SESSION['otp_confirmed'] = $val_result;
         echo json_encode(array('valid'=>$val_result));
     }
+    else if($_GET['mode'] == "remove") {
+        $result = DbAdapter::removeObject("otp_secret", $_SESSION['user']->getId(), 'id_user');
+        echo json_encode(array('valid'=>is_bool($result) ? true : false));
+    }
 ?>

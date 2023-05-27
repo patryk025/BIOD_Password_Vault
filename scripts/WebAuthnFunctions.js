@@ -119,8 +119,8 @@ async function checkRegistration(email) {
     }
 }
 
-function clearRegistration() {
-    window.fetch('api/u2f/WebAuthnServer.php?fn=clearRegistrations' + getGetParams(), {method:'GET',cache:'no-cache'}).then(function(response) {
+async function clearRegistration() {
+    return window.fetch('api/u2f/WebAuthnServer.php?fn=clearRegistrations' + getGetParams(), {method:'GET',cache:'no-cache'}).then(function(response) {
         return response.json();
 
     }).then(function(json) {
