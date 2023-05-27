@@ -3,7 +3,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col text-center">
-                        Wersja <b>0.0.1</b>
+                        Wersja <b>0.3.0</b>
                     </div>
                 </div>
             </div>
