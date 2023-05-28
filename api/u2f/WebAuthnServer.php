@@ -90,7 +90,7 @@ try {
             $formats[] = 'tpm';
         }
 
-        $rpId = 'localhost';
+        $rpId = $_SERVER['SERVER_NAME'];
         if (filter_input(INPUT_GET, 'rpId')) {
             $rpId = filter_input(INPUT_GET, 'rpId', FILTER_VALIDATE_DOMAIN);
             if ($rpId === false) {
