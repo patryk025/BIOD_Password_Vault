@@ -60,7 +60,7 @@
         }
     }
     else if(!$user) {
-        die(json_encode(array("error"=>true, "msg"=>"Użytkownik nie istnieje.")));
+        die(json_encode(array("error"=>true, "msg"=>"Błędny login i/lub hasło")));
     }
     else {
         die(json_encode(array("error"=>false)));
