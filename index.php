@@ -226,9 +226,12 @@ require("header.php");
             $('#portal').val(data.portal);
             $('#login').val(data.login);
             $('#password').val(data.password);
+
+            console.log(data);
             
             $('#passwordModalTitle').text('Edytuj hasło');
 
+            $('#passwordModal').data('id', data.id);
             $('#passwordModal').modal('show');
         });
 
@@ -246,11 +249,13 @@ require("header.php");
         $('#addPassword').on('click', function() {
             $('#passwordForm').trigger('reset');
             $('#passwordModalTitle').text('Dodaj hasło');
+            $('#passwordModal').removeData("id");
             $('#passwordModal').modal('show');
         });
 
         $('#savePassword').on('click', function() {
             var formData = {
+                id: $('#passwordModal').data('id'),
                 portal: $('#portal').val(),
                 login: $('#login').val(),
                 password: $('#password').val()

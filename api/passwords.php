@@ -46,8 +46,18 @@ switch($_SERVER['REQUEST_METHOD']) {
         echo json_encode(array("error"=>false, "passwords"=>$passwords_json));
         break;
     case 'POST':
-        $password = Passwords::createPassword($user->getId(), $_POST['portal'], $_POST['login'], $_POST['password']);
-        $result = $password->create();
+        if(isset($_POST['id'])) {
+            $password = DbAdapter::queryObject('passwords', $_POST['id'], 'id');
+            $password->setUrl($_POST['portal']);
+            $password->setLogin($_POST['login']);
+            $password->setPassword($_POST['password']);
+            $password->encryptPassword();
+            $password->update();
+        }
+        else {
+            $password = Passwords::createPassword($user->getId(), $_POST['portal'], $_POST['login'], $_POST['password']);
+            $result = $password->create();
+        }
         if($result == true) {
             echo json_encode(array("error"=>false));
         }
