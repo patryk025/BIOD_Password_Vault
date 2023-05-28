@@ -161,7 +161,7 @@ function bootstrap_alert(message, alertType = "warning") {
                     Jeżeli podano poprawny adres e-mail to wysłano wiadomość e-mail z linkiem do resetu hasła.
                 </div>
             <?php endif; ?>
-            <?php if(strtotime($reset_prompt->getValidTo()) < time()): ?>
+            <?php if(isset($reset_prompt) && $reset_prompt !== null && strtotime($reset_prompt->getValidTo()) < time()): ?>
                 <div class="alert alert-danger fade show" role="alert">
                     Podany link wygasł. Wygeneruj nowy.
                 </div>
